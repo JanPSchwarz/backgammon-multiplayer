@@ -7,6 +7,8 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
+const PORT = process.env.PORT || 3001;
+
 const rooms = {};
 
 wss.on("connection", (ws) => {
@@ -127,7 +129,7 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.listen(3001, () => {
+server.listen(PORT, () => {
   console.log("WebSocket Server running on ws://localhost:3001");
 });
 
