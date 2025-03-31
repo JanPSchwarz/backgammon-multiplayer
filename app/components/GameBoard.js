@@ -369,6 +369,7 @@ export default function GameBoard({
             return (
               <div
                 id={id}
+                key={id}
                 onClick={() => onClickHandler(id)}
                 className={`field relative ${id === selectedField ? `ring-4 ring-red-600` : ``}`}
               >
@@ -394,15 +395,17 @@ export default function GameBoard({
           const hasContent = gameState.board[key].length !== 0;
           return (
             <div
+              key={key}
               id={key}
               onClick={() => {
                 onClickHandler(key);
               }}
               className={`flex h-full flex-col items-center gap-[1.5%] rounded-md bg-[#7e524c] ${hasContent || isEndgame ? `opacity-1` : `opacity-0`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-8 ring-green-400 ring-offset-2` : ``}`}
             >
-              {gameState.board[key].map((item) => {
+              {gameState.board[key].map((item, index) => {
                 return (
                   <div
+                    key={index}
                     className={`${color === "black" ? "bg-black" : "bg-white"} h-[5%] w-[90%] rounded-md`}
                   />
                 );
@@ -414,50 +417,57 @@ export default function GameBoard({
       <div
         className={`absolute right-1/2 top-1/2 z-10 flex h-[77%] w-[70%] translate-x-[49.5%] translate-y-[-50.5%] flex-col gap-[3%]`}
       >
-        {board.map((area) => {
+        {board.map((area, index) => {
           return (
-            <div className={`flex w-full flex-1 gap-[5%]`}>
-              {area.map(({ fields, areaStyles, fieldStyles, stoneStyles }) => {
-                return (
-                  <div className={twMerge(areaStyles, ``) + ` field`}>
-                    {fields.map((id) => {
-                      return (
-                        <div
-                          key={id}
-                          id={id}
-                          onClick={() => {
-                            onClickHandler(id);
-                          }}
-                          className={twMerge(
-                            fieldStyles,
-                            `${id === selectedField ? `ring-4 ring-red-600` : ``}`,
-                            `${showOptions?.singleDiceOptions?.includes(id) ? `ring-4 ring-green-400` : ``}`,
-                            `${showOptions?.combinedOptions?.includes(id) ? `ring-4 ring-black` : ``}`,
-                          )}
-                        >
-                          {gameState.board[id]?.map(
-                            ({ field, color }, index) => {
-                              const length = gameState.board[id].length;
-                              const stack = length > 5;
-                              return (
-                                <Image
-                                  key={field}
-                                  id={field}
-                                  src={
-                                    color === "black" ? BlackStone : WhiteStone
-                                  }
-                                  alt="Stone"
-                                  className={twMerge(stoneStyles, ``)}
-                                />
-                              );
-                            },
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
+            <div key={index} className={`flex w-full flex-1 gap-[5%]`}>
+              {area.map(
+                ({ fields, areaStyles, fieldStyles, stoneStyles }, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className={twMerge(areaStyles, ``) + ` field`}
+                    >
+                      {fields.map((id) => {
+                        return (
+                          <div
+                            key={id}
+                            id={id}
+                            onClick={() => {
+                              onClickHandler(id);
+                            }}
+                            className={twMerge(
+                              fieldStyles,
+                              `${id === selectedField ? `ring-4 ring-red-600` : ``}`,
+                              `${showOptions?.singleDiceOptions?.includes(id) ? `ring-4 ring-green-400` : ``}`,
+                              `${showOptions?.combinedOptions?.includes(id) ? `ring-4 ring-black` : ``}`,
+                            )}
+                          >
+                            {gameState.board[id]?.map(
+                              ({ field, color }, index) => {
+                                const length = gameState.board[id].length;
+                                const stack = length > 5;
+                                return (
+                                  <Image
+                                    key={field}
+                                    id={field}
+                                    src={
+                                      color === "black"
+                                        ? BlackStone
+                                        : WhiteStone
+                                    }
+                                    alt="Stone"
+                                    className={twMerge(stoneStyles, ``)}
+                                  />
+                                );
+                              },
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                },
+              )}
             </div>
           );
         })}
