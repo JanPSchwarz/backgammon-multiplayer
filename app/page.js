@@ -1,70 +1,62 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import GameBoard from "./components/GameBoard";
+import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
+import { v4 as uuidv4 } from "uuid";
 
-const DiceComponent = dynamic(() => import("@3d-dice/dice-box"), {
-  ssr: false,
-});
+export default function Room() {
+  const [newRoomId, setNewRoomId] = useState();
 
-export default function Home() {
-  const [Dice, setDice] = useState(null);
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      import("@3d-dice/dice-box").then((module) => {
-        const DiceBox = module.default;
+    const ws = new WebSocket("ws://localhost:3001");
 
-        const diceInstance = new DiceBox({
-          id: "dice-canvas",
-          container: "#roll-box",
-          assetPath: "/assets/",
-          startingHeight: 8,
-          throwForce: 6,
-          spinForce: 5,
-          lightIntensity: 0.9,
-          scale: 15,
-          onDieComplete: (result) => console.log(result),
-        });
+    ws.onopen = () => {
+      console.log("connected to websocket");
+    };
 
-        diceInstance.init().then(() => {
-          console.log("Dice ready");
-        });
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
 
-        const canvas = document.querySelector(`#dice-canvas`);
+      if (message.type === "room-created") {
+        setNewRoomId(message.roomId);
+        console.log("room created:", message.roomId);
+      }
+    };
 
-        if (canvas) {
-          canvas.style.width = "100%";
-          canvas.style.height = "100%";
-        }
+    ws.onclose = () => {
+      console.log("websocket disconnected");
+    };
 
-        setDice(diceInstance);
-      });
-    }
+    socketRef.current = ws;
+
+    // return () => ws.close();
+    console.log(ws);
   }, []);
 
-  console.log(Dice);
+  function createRoom() {
+    const newRoomId = uuidv4();
 
-  function rollDice(event) {
-    event.preventDefault();
-    const attr = event.currentTarget.id.replace("roll-", "");
-    Dice.show().roll("2d6", attr);
+    socketRef.current.send(
+      JSON.stringify({ type: "create-room", roomId: newRoomId }),
+    );
   }
 
   return (
-    <>
-      <div className={`flex items-center justify-center`}>
-        <GameBoard />
-        <div id="roll-box" className={`w-full flex-1 border-[3px]`}></div>
-        <button
-          onClick={(event) => {
-            rollDice(event);
-          }}
-        >
-          Roll dice
-        </button>
-      </div>
-    </>
+    <div className={`flex flex-col`}>
+      <button
+        className={`my-6 rounded-md bg-orange-500 p-6 text-xl font-semibold`}
+        onClick={createRoom}
+      >
+        Create Rooom
+      </button>
+      <Link
+        href={`/${newRoomId}`}
+        className={`${newRoomId ? `opacity-100` : `opacity-0`} rounded-md bg-green-300 p-2 text-center transition-opacity duration-300`}
+      >
+        Your room is ready
+      </Link>
+    </div>
   );
 }

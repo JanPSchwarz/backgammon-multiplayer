@@ -1,24 +1,36 @@
 {
   "name": "backgammon",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"next dev\" \"node server.js\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.4",
+    "@3d-dice/dice-box-threejs": "^0.0.12",
+    "@3d-dice/theme-smooth": "^0.2.1",
+    "@3d-dice/theme-smooth-pip": "^0.2.1",
+    "@3d-dice/theme-wooden": "^0.2.0",
+    "concurrently": "^9.1.2",
+    "express": "^4.21.2",
     "next": "14.2.13",
     "react": "^18",
     "react-dom": "^18",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "tailwind-merge": "^3.0.2",
+    "uid": "^2.0.2",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
+    "nodemon": "^3.1.9",
     "postcss": "^8",
     "prettier": "3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
