@@ -27,6 +27,10 @@ export default function Room() {
         setNewRoomId(message.roomId);
         console.log("room created:", message.roomId);
       }
+
+      if (message.type === "error") {
+        console.log("ws-error", message.message);
+      }
     };
 
     ws.onclose = () => {
@@ -34,8 +38,6 @@ export default function Room() {
     };
 
     socketRef.current = ws;
-
-    // return () => ws.close();
     console.log(ws);
   }, []);
 

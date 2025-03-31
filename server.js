@@ -133,17 +133,6 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.on("upgrade", (request, socket, head) => {
-  const origin = request.headers.origin;
-  if (origin?.includes("vercel.app") || origin?.includes("localhost")) {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit("connection", ws, request);
-    });
-  } else {
-    socket.destroy();
-  }
-});
-
 server.listen(PORT, () => {
   console.log(`WebSocket Server running on ${PORT}`);
 });
