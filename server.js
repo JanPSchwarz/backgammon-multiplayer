@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { createServer } from "https";
+import { createServer } from "http";
 import express from "express";
 import { uid } from "uid";
 
@@ -7,7 +7,7 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
 const rooms = {};
 

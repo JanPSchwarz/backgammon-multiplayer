@@ -47,7 +47,7 @@ export default function Home() {
   }, [gameState.currentTurn]);
 
   useEffect(() => {
-    const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001";
+    const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080";
 
     const ws = new WebSocket(WS_URL);
 

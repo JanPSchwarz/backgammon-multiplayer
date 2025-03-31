@@ -10,7 +10,7 @@ export default function Room() {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001";
+    const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080";
 
     console.log("WEBSOCKET_URL:", WS_URL);
 
