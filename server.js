@@ -11,6 +11,10 @@ const PORT = process.env.PORT || 8080;
 
 const rooms = {};
 
+app.get("/", (req, res) => {
+  res.status(200).send("WebSocket Server is running");
+});
+
 wss.on("connection", (ws) => {
   console.log("Client connected");
   ws.id = uid();
