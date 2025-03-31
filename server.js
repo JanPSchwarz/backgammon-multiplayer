@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { createServer } from "http";
+import { createServer } from "https";
 import express from "express";
 import { uid } from "uid";
 
@@ -127,6 +127,17 @@ wss.on("connection", (ws) => {
       }
     }
   });
+});
+
+server.on("upgrade", (request, socket, head) => {
+  const origin = request.headers.origin;
+  if (origin?.includes("vercel.app") || origin?.includes("localhost")) {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
 });
 
 server.listen(PORT, () => {
