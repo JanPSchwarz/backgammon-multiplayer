@@ -12,6 +12,8 @@ export default function Room() {
   useEffect(() => {
     const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001";
 
+    console.log("WEBSOCKET_URL:", WS_URL);
+
     const ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
