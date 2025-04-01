@@ -86,7 +86,7 @@ wss.on("connection", (ws) => {
     if (data.type === "make-move") {
       const newBoard = data.board;
       const roomId = data.roomId;
-      broadCastToOtherPlayer(roomId, { type: "new-move", board: newBoard });
+      broadCastToOtherPlayer(roomId, ws, { type: "new-move", board: newBoard });
     }
 
     if (data.type === "switch-turn") {

@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         id="app"
-        className={`${manrope.variable} p-4 relative flex max-h-screen min-h-screen flex-row items-center justify-center bg-zinc-100 antialiased`}
+        className={`${manrope.variable} relative flex max-h-screen min-h-screen flex-row items-center justify-center bg-gradient-to-tl from-indigo-100 to-stone-300 antialiased md:p-4`}
       >
         {children}
       </body>
