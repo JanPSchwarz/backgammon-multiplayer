@@ -77,6 +77,7 @@ export default function Home() {
       if (message.type === "switch-turn") {
         console.log("switch turn to:", message.turn);
         handleGameState("currentTurn", message.turn);
+        handleGameState("diceResults", ["?", "?"])
       }
 
       if (message.type === "error") {

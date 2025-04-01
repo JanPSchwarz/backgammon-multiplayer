@@ -49,6 +49,12 @@ export default function Room() {
     );
   }
 
+  useEffect(() => {
+    if (newRoomId) {
+      navigator.clipboard.writeText(`localhost:3000/${newRoomId}`);
+    }
+  }, [newRoomId]);
+
   return (
     <div className={`flex flex-col`}>
       <button
