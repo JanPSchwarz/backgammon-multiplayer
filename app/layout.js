@@ -1,4 +1,5 @@
 import "./globals.css";
+import { allMetaData } from "./utils/pwa-metadata";
 import { Manrope } from "next/font/google";
 
 const manrope = Manrope({
@@ -7,10 +8,8 @@ const manrope = Manrope({
   variable: "--font-manrope",
 });
 
-export const metadata = {
-  title: "Backgammon",
-  description: "Play Backgammon with your friends!",
-};
+export const metadata = allMetaData;
+export const viewport = { themeColor: "#FFFFFF" };
 
 export default function RootLayout({ children }) {
   return (
