@@ -535,10 +535,14 @@ export default function GameBoard({
               <div key={index} className={`flex w-full flex-1 gap-[5%]`}>
                 {area.map(
                   ({ fields, areaStyles, fieldStyles, stoneStyles }, index) => {
+                    // shadow-[inset_0px_4px_15px_5px_rgba(0,_0,_0,_0.5),_0px_1px_5px_5px_rgba(0,_0,_0,_0.5)]
                     return (
                       <div
                         key={index}
-                        className={twMerge(areaStyles, ``) + ` field`}
+                        className={
+                          twMerge(areaStyles, `grid h-full grid-cols-6`) +
+                          ` field`
+                        }
                       >
                         {fields.map((id) => {
                           return (
@@ -550,9 +554,10 @@ export default function GameBoard({
                               }}
                               className={twMerge(
                                 fieldStyles,
-                                `${id === selectedField ? `shadow-inner-[10px]` : ``}`,
-                                `${showOptions?.singleDiceOptions?.includes(id) ? `[box-shadow:inset_0_0px_75px_rgba(0,0,0,0.6),_0_0_20px_rgba(0,0,0,0.6)]` : ``}`,
-                                `${showOptions?.combinedOptions?.includes(id) ? `ring-4 ring-black` : ``}`,
+                                `grid grid-cols-1 rounded-xl`,
+                                `${id === selectedField ? `bg-red-500/30 shadow-2xl shadow-red-500/30 ring ring-inset ring-red-500/30` : ``}`,
+                                `${showOptions?.singleDiceOptions?.includes(id) ? `bg-blue-500/40 shadow-2xl shadow-blue-400/50 ring ring-inset ring-blue-400/50` : ``}`,
+                                `${showOptions?.combinedOptions?.includes(id) ? `bg-orange-400/30 shadow-2xl shadow-orange-400/30 ring ring-inset ring-orange-400/30` : ``}`,
                               )}
                             >
                               {gameState.board[id]?.map(
