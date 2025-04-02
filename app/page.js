@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { v4 as uuidv4 } from "uuid";
 import { uid } from "uid";
 
 export default function Room() {
@@ -46,6 +45,13 @@ export default function Room() {
   function createRoom() {
     const newRoomId = uid();
 
+    const baseURL = window.location.href;
+    const newURL = `${baseURL}/${newRoomId}`;
+    navigator.clipboard.writeText(newURL);
+
+    setNewRoomId(newRoomId);
+    setShowText(true);
+
     socketRef.current.send(
       JSON.stringify({ type: "create-room", roomId: newRoomId }),
     );
@@ -53,16 +59,14 @@ export default function Room() {
 
   useEffect(() => {
     let timeOut;
-    if (newRoomId) {
-      const baseURL = window.location.href;
-      navigator.clipboard.writeText(`${baseURL}/${newRoomId}`);
-      setShowText(true);
+    if (showText) {
       timeOut = setTimeout(() => {
         setShowText(false);
       }, 3500);
     }
+
     return () => clearTimeout(timeOut);
-  }, [newRoomId]);
+  }, [showText]);
 
   return (
     <div className={`flex flex-col items-center justify-center`}>

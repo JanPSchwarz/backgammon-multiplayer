@@ -3,7 +3,7 @@ import WhiteStone from "@/public/board/whitestone.webp";
 import BlackStone from "@/public/board/blackstone.webp";
 import { board } from "../utils/board";
 import { twMerge } from "tailwind-merge";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function GameBoard({
