@@ -11,17 +11,22 @@ export default function DiceControls({
   gameState,
   yourTurn,
   handleDiceComplete,
+  diceResultsCopy,
+  disableButton,
+  handleDisableButton,
 }) {
   const [Dice, setDice] = useState(null);
-  const [isRolling, setIsRolling] = useState(false);
 
+  // define and set DICE
   useEffect(() => {
+    const diceScale = Math.max(Math.round(0.0422 * window.innerWidth), 50);
+
     if (typeof window !== "undefined" && !Dice) {
       const DiceBoxInstance = new DiceBox("#app", {
         light_intensity: 1.5,
         gravity_multiplier: 400,
         strength: 1,
-        baseScale: 80,
+        baseScale: diceScale,
         assetPath: "/",
       });
 
@@ -33,7 +38,6 @@ export default function DiceControls({
         } else {
           handleGameState("diceResults", values);
         }
-        setIsRolling(false);
       };
 
       DiceBoxInstance.initialize();
@@ -44,7 +48,6 @@ export default function DiceControls({
 
     if (canvas) {
       canvas.style.position = "fixed";
-      canvas.style.visibility = "visible";
       canvas.style.top = "0";
       canvas.style.zIndex = "100";
       canvas.style.width = "100vw";
@@ -53,10 +56,11 @@ export default function DiceControls({
     }
 
     return () => {
-      canvas.remove();
+      if (canvas) canvas.remove();
     };
   }, []);
 
+  // handle socket MESSAGES
   useEffect(() => {
     if (!socket.current) return;
 
@@ -64,7 +68,6 @@ export default function DiceControls({
       const message = JSON.parse(event.data);
       if (message.type === "dice-rolled") {
         handleGameState("diceResults", ["?", "?"]);
-        setIsRolling(true);
         const { determinedNumbers, theme_colorset } = message.diceConfig;
 
         Dice.updateConfig({ theme_colorset });
@@ -92,6 +95,7 @@ export default function DiceControls({
   function rollDice(event) {
     event.preventDefault();
     handleDiceComplete(false);
+    handleDisableButton(true);
 
     const randomResult1 = Math.floor(Math.random() * 5) + 1;
     const randomResult2 = Math.floor(Math.random() * 5) + 1;
@@ -124,36 +128,53 @@ export default function DiceControls({
     }
   }
 
+  // UI mapping
+
+  const diceCount = diceResultsCopy.reduce((acc, num) => {
+    acc[num] = (acc[num] || 0) + 1;
+    return acc;
+  }, {});
+
+  const diceUI = gameState.diceResults.map((result) => {
+    const isUsed = diceCount[result] > 0 ? false : true;
+    if (!isUsed) diceCount[result]--;
+
+    return { result, used: isUsed };
+  });
   return (
     <>
       <div
-        className={`relative flex w-[10%] flex-col items-center justify-center`}
+        className={`relative flex w-full max-w-[250px] flex-col items-center justify-center portrait:w-[30%] landscape:w-[15%]`}
       >
-        <p>{yourTurn ? "Your" : "Not Your"} turn!</p>
+        <p className={`text-center`}>{yourTurn ? "Your" : "Not Your"} turn!</p>
         <button
-          className={`my-6 rounded bg-green-400 p-4 px-8 font-semibold shadow-md transition-all active:scale-90 disabled:bg-gray-200`}
-          disabled={isRolling || !yourTurn}
+          className={`my-6 w-full rounded bg-blue-400 p-3 px-6 text-sm font-semibold shadow-md shadow-blue-500/50 transition-all active:scale-90 disabled:bg-zinc-300 disabled:shadow-zinc-500/50 md:p-4 md:px-8`}
+          disabled={disableButton}
           onClick={rollDice}
         >
           Roll dice
         </button>
-        <button
+        {/* <button
           className={`my-6 rounded bg-green-400 p-4 px-8 font-semibold shadow-md transition-all active:scale-90 disabled:bg-gray-200`}
-          disabled={isRolling}
+          disabled={disableButton}
           onClick={rollDiceTest}
         >
           Roll test
-        </button>
+        </button> */}
 
-        <div className={`flex flex-wrap items-center justify-center gap-4`}>
-          {gameState?.diceResults?.map((result, index) => (
-            <p
-              key={index}
-              className={`rounded-md border ${yourTurn ? `bg-green-200` : `bg-gray-200`} p-4 text-2xl font-semibold shadow-md`}
-            >
-              {result}
-            </p>
-          ))}
+        <div
+          className={`grid w-full grid-cols-2 grid-rows-2 place-items-center gap-2`}
+        >
+          {diceUI.map(({ result, used }, index) => {
+            return (
+              <p
+                key={index}
+                className={`h-full w-full rounded-md border border-none py-4 text-center transition-all duration-300 ${result ? `opacity-1` : `opacity-0`} ${!yourTurn || result === "?" ? `bg-gray-200 shadow-gray-500/50` : used ? `bg-rose-300 shadow-rose-500/50` : `bg-blue-300 shadow-blue-500/50`} text-lg font-semibold shadow-md md:text-2xl`}
+              >
+                {result || 0}
+              </p>
+            );
+          })}
         </div>
       </div>
     </>

@@ -3,9 +3,11 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
+import { uid } from "uid";
 
 export default function Room() {
   const [newRoomId, setNewRoomId] = useState();
+  const [showText, setShowText] = useState(false);
 
   const socketRef = useRef(null);
 
@@ -42,27 +44,46 @@ export default function Room() {
   }, []);
 
   function createRoom() {
-    const newRoomId = uuidv4();
+    const newRoomId = uid();
 
     socketRef.current.send(
       JSON.stringify({ type: "create-room", roomId: newRoomId }),
     );
   }
 
+  useEffect(() => {
+    let timeOut;
+    if (newRoomId) {
+      const baseURL = window.location.href;
+      navigator.clipboard.writeText(`${baseURL}/${newRoomId}`);
+      setShowText(true);
+      timeOut = setTimeout(() => {
+        setShowText(false);
+      }, 3500);
+    }
+    return () => clearTimeout(timeOut);
+  }, [newRoomId]);
+
   return (
-    <div className={`flex flex-col`}>
+    <div className={`flex flex-col items-center justify-center`}>
       <button
         className={`my-6 rounded-md bg-orange-500 p-6 text-xl font-semibold`}
         onClick={createRoom}
       >
-        Create Rooom
+        Create Room
       </button>
       <Link
         href={`/${newRoomId}`}
-        className={`${newRoomId ? `opacity-100` : `opacity-0`} rounded-md bg-green-300 p-2 text-center transition-opacity duration-300`}
+        className={`${newRoomId ? `opacity-100` : `opacity-0`} rounded-md bg-indigo-300 p-2 text-center font-semibold transition-opacity duration-300`}
       >
         Your room is ready
       </Link>
+
+      <p
+        className={`relative m-6 rounded-md bg-slate-400 bg-opacity-20 p-2 text-center text-sm transition-all delay-500 duration-300 ${showText ? `opacity-1 top-0` : `-top-[20px] opacity-0`}`}
+      >
+        Link was copied to Clipboard! Share it with a friend ❤️
+      </p>
     </div>
   );
 }
