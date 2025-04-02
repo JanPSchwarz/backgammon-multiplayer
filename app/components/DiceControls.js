@@ -110,26 +110,8 @@ export default function DiceControls({
       );
     }
   }
-  function rollDiceTest(event) {
-    event.preventDefault();
-    handleDiceComplete(false);
-
-    const randomResult1 = 6;
-    const randomResult2 = 6;
-    const determinedNumbers = `${randomResult1}, ${randomResult2}`;
-    const theme_colorset = pickRandomColor();
-
-    const diceConfig = { determinedNumbers, theme_colorset };
-
-    if (socket.current) {
-      socket.current.send(
-        JSON.stringify({ type: "roll-dice", diceConfig, roomId }),
-      );
-    }
-  }
 
   // UI mapping
-
   const diceCount = diceResultsCopy.reduce((acc, num) => {
     acc[num] = (acc[num] || 0) + 1;
     return acc;
@@ -154,14 +136,6 @@ export default function DiceControls({
         >
           Roll dice
         </button>
-        {/* <button
-          className={`my-6 rounded bg-green-400 p-4 px-8 font-semibold shadow-md transition-all active:scale-90 disabled:bg-gray-200`}
-          disabled={disableButton}
-          onClick={rollDiceTest}
-        >
-          Roll test
-        </button> */}
-
         <div
           className={`grid w-full grid-cols-2 grid-rows-2 place-items-center gap-2`}
         >
