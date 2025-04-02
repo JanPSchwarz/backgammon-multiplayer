@@ -24,9 +24,9 @@ export default function Home() {
   useEffect(() => {
     let timeOut;
     if (yourTurn && !gameState.diceResults.includes("?")) {
-      timeOut = setTimeout(() => {
-        setDiceComplete(true);
-      }, 2000);
+      //   timeOut = setTimeout(() => {
+      setDiceComplete(true);
+      //   }, 2000);
     }
     return () => clearTimeout(timeOut);
   }, [gameState.diceResults]);
@@ -44,9 +44,6 @@ export default function Home() {
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-
-      console.log(event.data);
-      console.log(message);
 
       if (message.type === "room-joined") {
         console.log("you joined room:", message.roomId);
@@ -99,11 +96,11 @@ export default function Home() {
   }, [gameState.currentTurn]);
 
   // logging
-  Object.entries(gameState).map(([key, value]) => {
-    if (key !== "board") {
-      console.log(`${key}:`, value);
-    }
-  });
+  //   Object.entries(gameState).map(([key, value]) => {
+  //     if (key !== "board") {
+  //       console.log(`${key}:`, value);
+  //     }
+  //   });
 
   // helper functions
   function handleDisableButton(value) {

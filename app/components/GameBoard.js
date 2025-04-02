@@ -22,11 +22,9 @@ export default function GameBoard({
   const [socketRef, setSocketRef] = useState();
   const [selectedField, setSelectedField] = useState();
   const [showOptions, setShowOptions] = useState();
-  const fieldRef = useRef();
-  const [fieldSize, setFieldSize] = useState(0);
 
   //Logic
-  const [allMoveOptions, setAllMoveOptions] = useState({});
+  const [allMoveOptions, setAllMoveOptions] = useState(null);
   const [isEndgame, setIsEndGame] = useState(false);
 
   const initalStepControl = {
@@ -99,7 +97,9 @@ export default function GameBoard({
   // initial setting of DICE RESULTS COPY
   // UP TO DATE NEEDED: gameState.diceResults
   useEffect(() => {
+    console.log("STEP 0");
     if (yourTurn && !gameState.diceResults.includes("?")) {
+      console.log("STEP 0 EXECUTE");
       handleDiceResultsCopy(gameState.diceResults);
       changeStepControl("allTrue");
     }
@@ -108,7 +108,9 @@ export default function GameBoard({
   // setting ISENDGAME
   // UP TO DATE NEEDED: gameState.board
   useEffect(() => {
+    console.log("STEP 1");
     if (stepControl.boardUpdated) {
+      console.log("STEP 1 EXECUTE");
       const { whiteOut, blackOut, ...rest } = gameState.board;
       const stones = Object.values(rest).flat();
 
@@ -138,18 +140,20 @@ export default function GameBoard({
   // calculate OPTIONS
   // UP TO DATE NEEDED: gameState.board && isEndgame && diceResultsCopy
   useEffect(() => {
+    console.log("STEP 2");
     if (
       stepControl.boardUpdated &&
       stepControl.endGameUpdated &&
       stepControl.diceResultsCopyUpdated
     ) {
       if (!yourTurn) {
-        setAllMoveOptions({});
+        setAllMoveOptions(null);
       } else if (
         yourTurn &&
         gameState &&
         !gameState.diceResults.includes("?")
       ) {
+        console.log("STEP 2 EXECUTE");
         const fieldsInUse = Object.keys(gameState.board).filter((field) => {
           return gameState.board[field].some(
             ({ color }) => color === gameState.yourColor,
@@ -192,6 +196,8 @@ export default function GameBoard({
         }, {});
 
         setAllMoveOptions(resultsObject);
+
+        console.log("RESULTS OBJECT:", resultsObject);
         changeStepControl("moveOptionsUpdated", true);
       }
     }
@@ -199,29 +205,33 @@ export default function GameBoard({
 
   // passing TURN
   useEffect(() => {
-    if (stepControl.moveOptionsUpdated) {
+    console.log("STEP 3");
+    console.log("CALCULATED MOVES 0:", allMoveOptions);
+    if (stepControl.moveOptionsUpdated && allMoveOptions) {
+      console.log("STEP 3 EXECUTE");
       const noOptions = Object.values(allMoveOptions).every(
         (value) => value.singleDiceOptions.length === 0,
       );
 
+      console.log("NO-OPTIONS:", noOptions);
+      console.log("YOUR TURN:", yourTurn);
+      console.log("DICE COMPLETE:", diceComplete);
+
+      console.log("CALCULATED MOVES 1:", allMoveOptions);
+      console.log("ALL TOGETHER:", yourTurn && diceComplete && noOptions);
+
       if (yourTurn && diceComplete && noOptions) {
-        socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
-        handleDiceComplete(false);
+        setTimeout(() => {
+          socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
+          handleDiceComplete(false);
+          setAllMoveOptions(null);
+        }, 1000);
       }
     }
     changeStepControl("reset");
-  }, [stepControl.moveOptionsUpdated]);
+  }, [stepControl.moveOptionsUpdated, allMoveOptions]);
 
-  //tracking field size
-  useEffect(() => {
-    if (fieldSize === 0 || !fieldRef.current) {
-      const size = fieldRef.current.clientHeight;
-      setFieldSize(size);
-    }
-  }, [fieldRef.current, fieldSize]);
-
-  console.log("FIELDSIZE:", fieldSize);
-  console.log("USEREF:", fieldRef);
+  console.log("CALCULATED MOVES 2:", allMoveOptions);
 
   // handling MOVING STONES onClick
   // UPDATES diceResultsCopy && gameState.board && sends message to WS
@@ -397,6 +407,8 @@ export default function GameBoard({
 
   // handling FINAL CLICK EVENT
   function onClickHandler(id) {
+    if (allMoveOptions == null) return;
+
     const fieldIsValidOption = Object.values(
       allMoveOptions[selectedField]?.singleDiceOptions || [],
     ).includes(id);
@@ -416,12 +428,6 @@ export default function GameBoard({
       handleGameBoardUI(true);
     }, randomTime);
   }
-
-  //   function calculateCompression(id, index) {
-  //     const stones = gameState.board[id].length;
-  //     const stoneSize = fieldSize / 5;
-  //     const compression = fieldSize / stoneSize;
-  //   }
 
   // UI mapping
   const throwOutArea = [
@@ -445,9 +451,19 @@ export default function GameBoard({
     { id: "25", color: "white", number: getStones("25") },
   ];
 
+  const isNoOption =
+    allMoveOptions !== null && diceResultsCopy.length !== 0
+      ? Object.keys(allMoveOptions).length === 0
+      : false;
+
   return (
     <>
       <div className={`relative w-full max-w-max select-none`}>
+        <div
+          className={`absolute ${isNoOption ? `opacity-1` : `opacity-0`} right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 bg-red-500/40 px-[3vw] py-[1vh] font-semibold shadow-md shadow-red-500/50 backdrop-blur-sm transition-opacity`}
+        >
+          Sorry, no Options
+        </div>
         <Image
           src={BoardImage}
           alt="Backgammon board"
@@ -529,14 +545,13 @@ export default function GameBoard({
                             <div
                               key={id}
                               id={id}
-                              ref={fieldRef}
                               onClick={() => {
                                 onClickHandler(id);
                               }}
                               className={twMerge(
                                 fieldStyles,
-                                `${id === selectedField ? `ring-4 ring-red-600` : ``}`,
-                                `${showOptions?.singleDiceOptions?.includes(id) ? `ring-4 ring-green-400` : ``}`,
+                                `${id === selectedField ? `shadow-inner-[10px]` : ``}`,
+                                `${showOptions?.singleDiceOptions?.includes(id) ? `[box-shadow:inset_0_0px_75px_rgba(0,0,0,0.6),_0_0_20px_rgba(0,0,0,0.6)]` : ``}`,
                                 `${showOptions?.combinedOptions?.includes(id) ? `ring-4 ring-black` : ``}`,
                               )}
                             >
@@ -546,8 +561,8 @@ export default function GameBoard({
                                     gameState.board[id].length;
                                   const isOtherSide = id > 12 && id < 25;
                                   const stack = numberOfStones > 5;
-                                  const spacing = fieldSize / numberOfStones;
                                   const direction = isOtherSide ? -1 : 1;
+                                  const spacing = 438 / numberOfStones;
                                   const value = index * spacing * direction;
                                   return (
                                     <Image

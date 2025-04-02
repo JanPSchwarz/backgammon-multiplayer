@@ -71,7 +71,6 @@ export default function DiceControls({
         const { determinedNumbers, theme_colorset } = message.diceConfig;
 
         Dice.updateConfig({ theme_colorset });
-        Dice.updateConfig({ baseScale: 20 });
         Dice.roll(`2dpip@${determinedNumbers}`);
       }
     }
@@ -142,9 +141,6 @@ export default function DiceControls({
 
     return { result, used: isUsed };
   });
-
-  console.log("DICE COUNT", diceCount);
-  console.log("DICE UI", diceUI);
   return (
     <>
       <div

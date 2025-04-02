@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
+import { uid } from "uid";
 
 export default function Room() {
   const [newRoomId, setNewRoomId] = useState();
@@ -43,7 +44,7 @@ export default function Room() {
   }, []);
 
   function createRoom() {
-    const newRoomId = uuidv4();
+    const newRoomId = uid();
 
     socketRef.current.send(
       JSON.stringify({ type: "create-room", roomId: newRoomId }),
@@ -53,7 +54,8 @@ export default function Room() {
   useEffect(() => {
     let timeOut;
     if (newRoomId) {
-      navigator.clipboard.writeText(`localhost:3000/${newRoomId}`);
+      const baseURL = window.location.href;
+      navigator.clipboard.writeText(`${baseURL}/${newRoomId}`);
       setShowText(true);
       timeOut = setTimeout(() => {
         setShowText(false);
@@ -78,7 +80,7 @@ export default function Room() {
       </Link>
 
       <p
-        className={`relative m-6 rounded-md bg-slate-400 bg-opacity-20 p-2 text-center text-sm transition-all delay-300 duration-300 ${showText ? `opacity-1 top-0` : `-top-[20px] opacity-0`}`}
+        className={`relative m-6 rounded-md bg-slate-400 bg-opacity-20 p-2 text-center text-sm transition-all delay-500 duration-300 ${showText ? `opacity-1 top-0` : `-top-[20px] opacity-0`}`}
       >
         Link was copied to Clipboard! Share it with a friend ❤️
       </p>
