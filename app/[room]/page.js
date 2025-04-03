@@ -186,6 +186,7 @@ export default function Home() {
           handleDiceComplete={handleDiceComplete}
           handleDiceResultsCopy={handleDiceResultsCopy}
           handleGameBoardUI={handleGameBoardUI}
+          handleDisableButton={handleDisableButton}
         />
         <DiceControls
           socket={socketRef}

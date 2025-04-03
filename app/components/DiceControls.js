@@ -131,7 +131,7 @@ export default function DiceControls({
           Roll dice
         </button>
         <div
-          className={`grid w-full grid-cols-2 grid-rows-2 place-items-center gap-2`}
+          className={`grid m-1 w-full grid-cols-2 grid-rows-2 place-items-center gap-2`}
         >
           {diceUI.map(({ result, used }, index) => {
             return (
