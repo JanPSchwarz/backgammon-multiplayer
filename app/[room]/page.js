@@ -5,6 +5,8 @@ import DiceControls from "../components/DiceControls";
 import { usePathname } from "next/navigation";
 import { intialGameState } from "../utils/gameState";
 import Spinner from "@/public/board/infinite-spinner.svg";
+import HomeIcon from "@/public/home.svg";
+import LeavePrompt from "../components/LeavePrompt";
 
 export default function Home() {
   const pathname = usePathname();
@@ -21,14 +23,15 @@ export default function Home() {
   const [disableButton, setDisableButton] = useState(false);
   const [boardLoaded, setBoardLoaded] = useState(false);
 
+  // PWA navigation
+  const [isPWA, setIsPWA] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+
+  // setting If dice COMPLETE
   useEffect(() => {
-    let timeOut;
     if (yourTurn && !gameState.diceResults.includes("?")) {
-      //   timeOut = setTimeout(() => {
       setDiceComplete(true);
-      //   }, 2000);
     }
-    return () => clearTimeout(timeOut);
   }, [gameState.diceResults]);
 
   // websocket && MESSAGE handling setup
@@ -95,6 +98,28 @@ export default function Home() {
     }
   }, [gameState.currentTurn]);
 
+  // detect PWA
+  useEffect(() => {
+    if (window.matchMedia(`(display-mode: standalone)`).matches) {
+      setIsPWA(true);
+    }
+  }, []);
+
+  // adding HANDLER before LEAVING page
+  useEffect(() => {
+    function beforeUnload(event) {
+      event.preventDefault();
+
+      event.returnValue = true;
+    }
+
+    window.addEventListener("beforeunload", beforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnload);
+    };
+  }, []);
+
   // logging
   //   Object.entries(gameState).map(([key, value]) => {
   //     if (key !== "board") {
@@ -125,6 +150,10 @@ export default function Home() {
     setBoardLoaded(value);
   }
 
+  function handleModal() {
+    setShowLeaveModal(false);
+  }
+
   return (
     <>
       <div
@@ -133,9 +162,18 @@ export default function Home() {
         <Spinner className={`w-[50%] max-w-[250px]`} />
         <p>Loading Game...</p>
       </div>
+      <button
+        onClick={() => {
+          setShowLeaveModal(true);
+        }}
+        className={`absolute ${boardLoaded ? `opacity-1` : `opacity-0`} bottom-0 right-0 z-10 p-3`}
+      >
+        <HomeIcon className={`m-2 size-8 fill-blue-500 md:size-10`} />
+      </button>
+      {showLeaveModal && <LeavePrompt closeModal={handleModal} />}
       <div
         id="gameboard"
-        className={`relative flex h-full w-full items-center justify-evenly gap-4 portrait:flex-col ${boardLoaded ? `opacity-1` : `opacity-0`} transition-opacity duration-500 landscape:flex-row`}
+        className={`relative flex h-full w-full items-center justify-center gap-4 portrait:flex-col ${boardLoaded ? `opacity-1` : `opacity-0`} transition-opacity duration-500 landscape:flex-row`}
       >
         <GameBoard
           socket={socketRef}
@@ -156,6 +194,7 @@ export default function Home() {
           gameState={gameState}
           yourTurn={yourTurn}
           diceResultsCopy={diceResultsCopy}
+          isPWA={isPWA}
           handleDiceComplete={handleDiceComplete}
           handleGameState={handleGameState}
           handleDisableButton={handleDisableButton}

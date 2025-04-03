@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+import withPWAInit from "@ducanh2912/next-pwa";
+
 const nextConfig = {
   webpack(config) {
     config.module.rules.push({
@@ -10,4 +12,10 @@ const nextConfig = {
   reactStrictMode: false,
 };
 
-export default nextConfig;
+const withPWA = withPWAInit({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+});
+
+export default withPWA(nextConfig);

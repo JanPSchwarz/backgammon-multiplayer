@@ -3,7 +3,7 @@ import WhiteStone from "@/public/board/whitestone.webp";
 import BlackStone from "@/public/board/blackstone.webp";
 import { board } from "../utils/board";
 import { twMerge } from "tailwind-merge";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function GameBoard({
@@ -423,7 +423,6 @@ export default function GameBoard({
   // function for UI loading
   function handleUILoading() {
     const randomTime = Math.floor(Math.random() * 1000 + 1500);
-    console.log("RANDOM TIME", randomTime);
     setTimeout(() => {
       handleGameBoardUI(true);
     }, randomTime);
@@ -458,147 +457,156 @@ export default function GameBoard({
 
   return (
     <>
-      <div className={`relative w-full max-w-max select-none`}>
-        <div
-          className={`absolute ${isNoOption ? `opacity-1` : `opacity-0`} right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 bg-red-500/40 px-[3vw] py-[1vh] font-semibold shadow-md shadow-red-500/50 backdrop-blur-sm transition-opacity`}
-        >
-          Sorry, no Options
-        </div>
-        <Image
-          src={BoardImage}
-          alt="Backgammon board"
-          quality={50}
-          loading="eager"
-          priority
-          className={`max-w-screen h-auto max-h-screen w-auto`}
-          onLoad={handleUILoading}
-        />
-        <div
-          className={`absolute right-1/2 top-1/2 z-20 h-[14%] w-[5%] -translate-y-1/2 translate-x-[38%]`}
-        >
-          {prison
-            .filter(({ number }) => number !== 0)
-            .map(({ color, number, id }, index) => {
+      <div
+        className={`flex h-full w-full max-w-max select-none items-center justify-center`}
+      >
+        <div className={`relative max-h-max`}>
+          <Image
+            src={BoardImage}
+            alt="Backgammon board"
+            quality={50}
+            loading="eager"
+            priority
+            className={`h-auto max-h-dvh w-auto`}
+            onLoad={handleUILoading}
+          />
+          <div
+            className={`absolute ${isNoOption ? `opacity-1` : `opacity-0`} right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 bg-red-500/40 px-[3vw] py-[1vh] font-semibold shadow-md shadow-red-500/50 backdrop-blur-sm transition-opacity`}
+          >
+            Sorry, no Options
+          </div>
+
+          <div
+            className={`absolute right-1/2 top-1/2 z-20 h-[14%] w-[5%] -translate-y-1/2 translate-x-[38%]`}
+          >
+            {prison
+              .filter(({ number }) => number !== 0)
+              .map(({ color, number, id }, index) => {
+                return (
+                  <div
+                    id={id}
+                    key={id}
+                    onClick={() => onClickHandler(id)}
+                    className={`field relative ${id === selectedField ? `ring-4 ring-red-600` : ``}`}
+                  >
+                    <Image
+                      key={index}
+                      alt="stone"
+                      src={color === "black" ? BlackStone : WhiteStone}
+                      className={``}
+                    />
+                    <p
+                      className={`absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 ${color === "black" ? `text-white` : `text-black`}`}
+                    >
+                      {number}
+                    </p>
+                  </div>
+                );
+              })}
+          </div>
+
+          <div
+            className={`absolute right-[2.5%] top-1/2 flex h-[80%] w-[5%] -translate-y-1/2 flex-col gap-[3%]`}
+          >
+            {throwOutArea.map(({ key, color }) => {
+              const hasContent = gameState.board[key].length !== 0;
               return (
                 <div
-                  id={id}
-                  key={id}
-                  onClick={() => onClickHandler(id)}
-                  className={`field relative ${id === selectedField ? `ring-4 ring-red-600` : ``}`}
+                  key={key}
+                  id={key}
+                  onClick={() => {
+                    onClickHandler(key);
+                  }}
+                  className={`flex h-full flex-col items-center gap-[1.5%] rounded-md ${color === "black" ? `bg-gradient-to-b` : `bg-gradient-to-t`} from-zinc-300 to-orange-200 ${hasContent || isEndgame ? `opacity-1` : `opacity-0`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-8 ring-green-400 ring-offset-2` : ``}`}
                 >
-                  <Image
-                    key={index}
-                    alt="stone"
-                    src={color === "black" ? BlackStone : WhiteStone}
-                    className={``}
-                  />
-                  <p
-                    className={`absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 ${color === "black" ? `text-white` : `text-black`}`}
-                  >
-                    {number}
-                  </p>
-                </div>
-              );
-            })}
-        </div>
-        <div
-          className={`absolute right-[2.5%] top-1/2 flex h-[80%] w-[5%] -translate-y-1/2 flex-col gap-[3%]`}
-        >
-          {throwOutArea.map(({ key, color }) => {
-            const hasContent = gameState.board[key].length !== 0;
-            return (
-              <div
-                key={key}
-                id={key}
-                onClick={() => {
-                  onClickHandler(key);
-                }}
-                className={`flex h-full flex-col items-center gap-[1.5%] rounded-md ${color === "black" ? `bg-gradient-to-b` : `bg-gradient-to-t`} from-zinc-300 to-orange-200 ${hasContent || isEndgame ? `opacity-1` : `opacity-0`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-8 ring-green-400 ring-offset-2` : ``}`}
-              >
-                {gameState.board[key].map((item, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className={`${color === "black" ? "bg-black" : "bg-white"} h-[5%] w-[90%] rounded-md`}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-        <div
-          className={`absolute right-1/2 top-1/2 z-10 flex h-[77%] w-[70%] translate-x-[49.5%] translate-y-[-50.5%] flex-col gap-[3%]`}
-        >
-          {board.map((area, index) => {
-            return (
-              <div key={index} className={`flex w-full flex-1 gap-[5%]`}>
-                {area.map(
-                  ({ fields, areaStyles, fieldStyles, stoneStyles }, index) => {
-                    // shadow-[inset_0px_4px_15px_5px_rgba(0,_0,_0,_0.5),_0px_1px_5px_5px_rgba(0,_0,_0,_0.5)]
+                  {gameState.board[key].map((item, index) => {
                     return (
                       <div
                         key={index}
-                        className={
-                          twMerge(areaStyles, `grid h-full grid-cols-6`) +
-                          ` field`
-                        }
-                      >
-                        {fields.map((id) => {
-                          return (
-                            <div
-                              key={id}
-                              id={id}
-                              onClick={() => {
-                                onClickHandler(id);
-                              }}
-                              className={twMerge(
-                                fieldStyles,
-                                `grid grid-cols-1 rounded-xl`,
-                                `${id === selectedField ? `bg-red-500/30 shadow-2xl shadow-red-500/30 ring ring-inset ring-red-500/30` : ``}`,
-                                `${showOptions?.singleDiceOptions?.includes(id) ? `bg-blue-500/40 shadow-2xl shadow-blue-400/50 ring ring-inset ring-blue-400/50` : ``}`,
-                                `${showOptions?.combinedOptions?.includes(id) ? `bg-orange-400/30 shadow-2xl shadow-orange-400/30 ring ring-inset ring-orange-400/30` : ``}`,
-                              )}
-                            >
-                              {gameState.board[id]?.map(
-                                ({ id: field, color }, index) => {
-                                  const numberOfStones =
-                                    gameState.board[id].length;
-                                  const isOtherSide = id > 12 && id < 25;
-                                  const stack = numberOfStones > 5;
-                                  const direction = isOtherSide ? -1 : 1;
-                                  const spacing = 438 / numberOfStones;
-                                  const value = index * spacing * direction;
-                                  return (
-                                    <Image
-                                      key={field}
-                                      id={field}
-                                      src={
-                                        color === "black"
-                                          ? BlackStone
-                                          : WhiteStone
-                                      }
-                                      alt="Stone"
-                                      className={twMerge(stoneStyles, ``)}
-                                      style={{
-                                        position: stack && "absolute",
-                                        transform:
-                                          stack && `translateY(${value}%)`,
-                                      }}
-                                    />
-                                  );
-                                },
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                        className={`${color === "black" ? "bg-black" : "bg-white"} h-[5%] w-[90%] rounded-md`}
+                      />
                     );
-                  },
-                )}
-              </div>
-            );
-          })}
+                  })}
+                </div>
+              );
+            })}
+          </div>
+          <div
+            className={`absolute right-1/2 top-1/2 z-10 flex h-[77%] w-[70%] translate-x-[49.5%] translate-y-[-50.5%] flex-col gap-[3%]`}
+          >
+            {board.map((area, index) => {
+              return (
+                <div key={index} className={`flex w-full flex-1 gap-[5%]`}>
+                  {area.map(
+                    (
+                      { fields, areaStyles, fieldStyles, stoneStyles },
+                      index,
+                    ) => {
+                      return (
+                        <div
+                          key={index}
+                          className={
+                            twMerge(areaStyles, `grid h-full grid-cols-6`) +
+                            ` field`
+                          }
+                        >
+                          {fields.map((id) => {
+                            const isBottom = id > 12 && id < 25;
+                            return (
+                              <div
+                                key={id}
+                                id={id}
+                                onClick={() => {
+                                  onClickHandler(id);
+                                }}
+                                className={twMerge(
+                                  fieldStyles,
+                                  `relative grid grid-cols-1 ${isBottom ? `rounded-t-xl` : `rounded-b-xl`}`,
+                                  `${id === selectedField ? `bg-red-500/30 shadow-2xl shadow-red-500/30 ring ring-inset ring-red-500/30` : ``}`,
+                                  `${showOptions?.singleDiceOptions?.includes(id) ? `bg-blue-500/40 shadow-2xl shadow-blue-400/50 ring ring-inset ring-blue-400/50` : ``}`,
+                                  `${showOptions?.combinedOptions?.includes(id) ? `bg-orange-400/30 shadow-2xl shadow-orange-400/30 ring ring-inset ring-orange-400/30` : ``}`,
+                                )}
+                              >
+                                {gameState.board[id]?.map(
+                                  ({ id: field, color }, index) => {
+                                    const numberOfStones =
+                                      gameState.board[id].length;
+                                    const isBottom = id > 12 && id < 25;
+                                    const stack = numberOfStones > 5;
+                                    const direction = isBottom ? -1 : 1;
+                                    const spacing = 438 / numberOfStones;
+                                    const value = index * spacing * direction;
+                                    return (
+                                      <Image
+                                        key={field}
+                                        id={field}
+                                        src={
+                                          color === "black"
+                                            ? BlackStone
+                                            : WhiteStone
+                                        }
+                                        alt="Stone"
+                                        className={twMerge(stoneStyles, ``)}
+                                        style={{
+                                          position: stack && "absolute",
+                                          transform:
+                                            stack && `translateY(${value}%)`,
+                                        }}
+                                      />
+                                    );
+                                  },
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </>
