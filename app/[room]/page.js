@@ -5,6 +5,7 @@ import DiceControls from "../components/DiceControls";
 import { usePathname } from "next/navigation";
 import { intialGameState } from "../utils/gameState";
 import Spinner from "@/public/board/infinite-spinner.svg";
+import HomeIcon from "@/public/home.svg";
 
 export default function Home() {
   const pathname = usePathname();
@@ -20,6 +21,17 @@ export default function Home() {
   // UI
   const [disableButton, setDisableButton] = useState(false);
   const [boardLoaded, setBoardLoaded] = useState(false);
+
+  // PWA navigation
+  const [isPWA, setIsPWA] = useState(false);
+  //   const [showLeaveModal, setShowLeaveModal] = useState(false);
+
+  // detect PWA
+  useEffect(() => {
+    if (window.matchMedia(`(display-mode: standalone)`).matches) {
+      setIsPWA(true);
+    }
+  }, []);
 
   useEffect(() => {
     let timeOut;
@@ -128,11 +140,14 @@ export default function Home() {
   return (
     <>
       <div
-        className={`fixed flex h-screen w-screen flex-col items-center justify-end gap-10 ${boardLoaded ? `hidden` : `visible`} top-0 transition-opacity`}
+        className={`fixed flex h-screen w-screen flex-col items-center justify-center gap-10 ${boardLoaded ? `hidden` : `visible`} top-0 transition-opacity`}
       >
         <Spinner className={`w-[50%] max-w-[250px]`} />
         <p>Loading Game...</p>
       </div>
+      <button className={`absolute bottom-0 right-0`}>
+        <HomeIcon />
+      </button>
       <div
         id="gameboard"
         className={`relative flex h-full w-full items-center justify-center gap-4 portrait:flex-col ${boardLoaded ? `opacity-1` : `opacity-0`} transition-opacity duration-500 landscape:flex-row`}
@@ -156,6 +171,7 @@ export default function Home() {
           gameState={gameState}
           yourTurn={yourTurn}
           diceResultsCopy={diceResultsCopy}
+          isPWA={isPWA}
           handleDiceComplete={handleDiceComplete}
           handleGameState={handleGameState}
           handleDisableButton={handleDisableButton}

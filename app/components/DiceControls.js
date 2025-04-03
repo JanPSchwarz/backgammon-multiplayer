@@ -10,6 +10,7 @@ export default function DiceControls({
   handleGameState,
   gameState,
   yourTurn,
+  isPWA,
   handleDiceComplete,
   diceResultsCopy,
   disableButton,
@@ -50,8 +51,8 @@ export default function DiceControls({
       canvas.style.position = "fixed";
       canvas.style.top = "0";
       canvas.style.zIndex = "100";
-      canvas.style.width = "100vw";
-      canvas.style.height = "100vh";
+      canvas.style.width = "100dvw";
+      canvas.style.height = "100dvh";
       canvas.style.pointerEvents = "none";
     }
 
@@ -79,14 +80,7 @@ export default function DiceControls({
   }, [socket.current]);
 
   function pickRandomColor() {
-    const themes = [
-      "white",
-      "black",
-      "rainbow",
-      "bronze",
-      "necrotic",
-      "thunder",
-    ];
+    const themes = ["white", "black", "rainbow", "bronze", "necrotic"];
     const random = Math.floor(Math.random() * themes.length);
 
     return themes[random];

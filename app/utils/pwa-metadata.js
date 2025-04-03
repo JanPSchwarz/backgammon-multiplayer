@@ -16,7 +16,7 @@ const allMetaData = {
   },
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",
-  appleWebApp: {
+  mobileApp: {
     capable: true,
     statusBarStyle: "default",
     title: APP_DEFAULT_TITLE,

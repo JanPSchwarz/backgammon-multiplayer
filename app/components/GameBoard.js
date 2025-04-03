@@ -518,7 +518,7 @@ export default function GameBoard({
                   onClick={() => {
                     onClickHandler(key);
                   }}
-                  className={`flex h-full flex-col items-center gap-[1.5%] rounded-md ${color === "black" ? `bg-gradient-to-b` : `bg-gradient-to-t`} from-zinc-300 to-orange-200 ${hasContent || isEndgame ? `opacity-1` : `opacity-1`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-8 ring-green-400 ring-offset-2` : ``}`}
+                  className={`flex h-full flex-col items-center gap-[1.5%] rounded-md ${color === "black" ? `bg-gradient-to-b` : `bg-gradient-to-t`} from-zinc-300 to-orange-200 ${hasContent || isEndgame ? `opacity-1` : `opacity-0`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-8 ring-green-400 ring-offset-2` : ``}`}
                 >
                   {gameState.board[key].map((item, index) => {
                     return (
