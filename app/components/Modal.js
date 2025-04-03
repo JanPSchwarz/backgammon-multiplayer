@@ -9,7 +9,7 @@ export default function Modal({ children, onClose }) {
     if (dialogRef.current) {
       dialogRef.current.showModal();
     }
-  }, [dialogRef.current]);
+  }, [dialogRef]);
 
   function closeModal(event) {
     event.stopPropagation();

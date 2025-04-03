@@ -423,7 +423,6 @@ export default function GameBoard({
   // function for UI loading
   function handleUILoading() {
     const randomTime = Math.floor(Math.random() * 1000 + 1500);
-    console.log("RANDOM TIME", randomTime);
     setTimeout(() => {
       handleGameBoardUI(true);
     }, randomTime);

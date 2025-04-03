@@ -4,10 +4,12 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { uid } from "uid";
 import PWAManual from "./components/PWAManual";
+import ShareIcon from "@/public/share.svg";
 
 export default function Room() {
   const [newRoomId, setNewRoomId] = useState();
   const [showText, setShowText] = useState(false);
+  const [deviceCanShare, setDeviceCanShare] = useState(false);
 
   const [pwaNOTinstalled, setpwaNOTinstalled] = useState(false);
   const [storedPrompt, setStorePrompt] = useState(false);
@@ -85,6 +87,14 @@ export default function Room() {
     return () => clearTimeout(timeOut);
   }, [showText]);
 
+  // share capability
+  useEffect(() => {
+    const canShare = !!navigator.share;
+    if (canShare) {
+      setDeviceCanShare(true);
+    }
+  }, []);
+
   function createRoom() {
     const newRoomId = uid();
 
@@ -93,7 +103,6 @@ export default function Room() {
     navigator.clipboard.writeText(newURL);
 
     setNewRoomId(newRoomId);
-    setShowText(true);
 
     socketRef.current.send(
       JSON.stringify({ type: "create-room", roomId: newRoomId }),
@@ -110,6 +119,25 @@ export default function Room() {
 
   function handleShowManual() {
     setShowManualForPWA(false);
+  }
+
+  function shareLink() {
+    if (newRoomId) {
+      const baseURL = window.location.href;
+      const newURL = `${baseURL}${newRoomId}`;
+
+      const data = {
+        title: "Wanna play Backgammon?",
+        url: newURL,
+      };
+
+      if (deviceCanShare) {
+        navigator.share(data);
+      } else {
+        navigator.clipboard.writeText(newURL);
+        setShowText(true);
+      }
+    }
   }
 
   return (
@@ -129,15 +157,22 @@ export default function Room() {
       >
         Create Room
       </button>
-      <Link
-        href={`/${newRoomId}`}
-        className={`${newRoomId ? `opacity-100` : `opacity-0`} rounded-md bg-indigo-300 p-2 text-center font-semibold transition-opacity duration-300`}
+      <div
+        className={`flex ${newRoomId ? `opacity-100` : `opacity-0`} items-center gap-2 transition-opacity duration-300`}
       >
-        Your room is ready
-      </Link>
+        <Link
+          href={`/${newRoomId}`}
+          className={`rounded-md bg-indigo-300 p-2 text-center font-semibold`}
+        >
+          Your room is ready
+        </Link>
+        <button className={``} onClick={shareLink}>
+          <ShareIcon className={`size-10 rounded-md bg-indigo-300 p-1`} />
+        </button>
+      </div>
 
       <p
-        className={`relative m-6 rounded-md bg-slate-400 bg-opacity-20 p-2 text-center text-sm transition-all delay-500 duration-300 ${showText ? `opacity-1 top-0` : `-top-[20px] opacity-0`}`}
+        className={`relative m-6 rounded-md bg-slate-400 bg-opacity-20 p-2 text-center text-sm transition-all duration-300 ${showText ? `opacity-1 top-0` : `-top-[20px] opacity-0`}`}
       >
         Link was copied to Clipboard! Share it with a friend ❤️
       </p>
