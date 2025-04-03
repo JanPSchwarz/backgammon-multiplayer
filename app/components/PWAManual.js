@@ -18,7 +18,7 @@ export default function PWAManual({ handleShowManual }) {
         <>
           Click this
           <ShareIcon className={`mx-2 inline size-6 align-baseline`} />
-          in your browser's address bar or menu!
+          in your browser&apos;s address bar or menu!
         </>
       ),
     },
