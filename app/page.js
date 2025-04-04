@@ -246,9 +246,9 @@ export default function Room() {
           </button>
           {noRoom && (
             <p
-              className={`absolute bottom-0 my-2 w-full translate-y-[200%] rounded-md bg-red-400/50 p-1`}
+              className={`absolute my-2 w-full rounded-md bg-red-400/50 p-1 portrait:translate-y-[200%] landscape:translate-x-[110%] landscape:lg:translate-x-0 landscape:lg:translate-y-[200%]`}
             >
-              Room doesn't exist...
+              Room doesn&apos;t exist...
             </p>
           )}
         </div>
