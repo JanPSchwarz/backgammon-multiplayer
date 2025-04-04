@@ -35,10 +35,10 @@ export default function Modal({ children, onClose }) {
       >
         <div className={``} onClick={(event) => event.stopPropagation()}>
           <button
-            className={`absolute right-0 top-0 max-w-min rounded-full`}
+            className={`absolute right-0 top-0 m-1 max-w-min rounded-full`}
             onClick={closeModal}
           >
-            <Close className={`size-8 fill-red-400`} />
+            <Close className={`size-6 fill-red-400`} />
           </button>
           {children}
         </div>

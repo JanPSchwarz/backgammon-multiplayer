@@ -13,10 +13,10 @@ export default function LeavePrompt({ closeModal }) {
             </span>
           </p>
           <div className={`grid grid-cols-2 gap-6 font-medium`}>
-            <Link href={"/"} className={`rounded-md bg-green-300 text-center`}>
+            <Link href={"/"} className={`rounded-md bg-red-300 text-center`}>
               Leave
             </Link>
-            <button onClick={closeModal} className={`rounded-md bg-red-300`}>
+            <button onClick={closeModal} className={`rounded-md bg-green-300`}>
               Stay
             </button>
           </div>

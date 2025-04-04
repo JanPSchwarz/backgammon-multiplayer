@@ -49,10 +49,8 @@ export default function DiceControls({
 
     if (canvas) {
       canvas.style.position = "fixed";
-      canvas.style.top = "0";
+      canvas.style.padding = "10px";
       canvas.style.zIndex = "100";
-      canvas.style.width = "100dvw";
-      canvas.style.height = "100dvh";
       canvas.style.pointerEvents = "none";
     }
 
@@ -131,7 +129,7 @@ export default function DiceControls({
           Roll dice
         </button>
         <div
-          className={`grid m-1 w-full grid-cols-2 grid-rows-2 place-items-center gap-2`}
+          className={`m-1 grid w-full grid-cols-2 grid-rows-2 place-items-center gap-2`}
         >
           {diceUI.map(({ result, used }, index) => {
             return (

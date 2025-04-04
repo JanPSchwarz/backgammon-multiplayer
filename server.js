@@ -112,6 +112,12 @@ wss.on("connection", (ws) => {
 
       broadCastToRoom(roomId, { type: "dice-rolled", diceConfig });
     }
+
+    if (data.type === "check-exist") {
+      const roomId = data.roomId;
+      const exists = Object.keys(rooms).includes(roomId);
+      ws.send(JSON.stringify({ type: "room-exists", exists, roomId }));
+    }
   });
 
   ws.on("close", () => {
