@@ -17,11 +17,13 @@ export default function GameBoard({
   roomId,
   diceComplete,
   handleGameBoardUI,
+  handleDisableButton,
 }) {
   //UI
   const [socketRef, setSocketRef] = useState();
   const [selectedField, setSelectedField] = useState();
   const [showOptions, setShowOptions] = useState();
+  const [noOptions, setNoOptions] = useState(false);
 
   //Logic
   const [allMoveOptions, setAllMoveOptions] = useState(null);
@@ -94,14 +96,16 @@ export default function GameBoard({
     socketRef.addEventListener("message", handleMessage);
   }, [socketRef]);
 
-  // initial setting of DICE RESULTS COPY
+  // initial setting of DICE RESULTS COPY and stepControl
   // UP TO DATE NEEDED: gameState.diceResults
   useEffect(() => {
     console.log("STEP 0");
+    if (!yourTurn) return;
     if (yourTurn && !gameState.diceResults.includes("?")) {
       console.log("STEP 0 EXECUTE");
       handleDiceResultsCopy(gameState.diceResults);
-      changeStepControl("allTrue");
+      // changeStepControl("diceResultsCopyUpdated", true);
+      changeStepControl("boardUpdated", true);
     }
   }, [gameState.diceResults, yourTurn]);
 
@@ -133,6 +137,7 @@ export default function GameBoard({
       } else {
         setIsEndGame(false);
       }
+      changeStepControl("boardUpdated", false);
       changeStepControl("endGameUpdated", true);
     }
   }, [stepControl.boardUpdated]);
@@ -141,11 +146,7 @@ export default function GameBoard({
   // UP TO DATE NEEDED: gameState.board && isEndgame && diceResultsCopy
   useEffect(() => {
     console.log("STEP 2");
-    if (
-      stepControl.boardUpdated &&
-      stepControl.endGameUpdated &&
-      stepControl.diceResultsCopyUpdated
-    ) {
+    if (stepControl.endGameUpdated) {
       if (!yourTurn) {
         setAllMoveOptions(null);
       } else if (
@@ -196,42 +197,66 @@ export default function GameBoard({
         }, {});
 
         setAllMoveOptions(resultsObject);
+        changeStepControl("endGameUpdated", false);
+        changeStepControl("moveOptionsUpdated", true);
 
         console.log("RESULTS OBJECT:", resultsObject);
-        changeStepControl("moveOptionsUpdated", true);
       }
     }
-  }, [stepControl]);
+  }, [stepControl.endGameUpdated]);
 
   // passing TURN
   useEffect(() => {
     console.log("STEP 3");
-    console.log("CALCULATED MOVES 0:", allMoveOptions);
     if (stepControl.moveOptionsUpdated && allMoveOptions) {
       console.log("STEP 3 EXECUTE");
       const noOptions = Object.values(allMoveOptions).every(
         (value) => value.singleDiceOptions.length === 0,
       );
 
-      console.log("NO-OPTIONS:", noOptions);
-      console.log("YOUR TURN:", yourTurn);
-      console.log("DICE COMPLETE:", diceComplete);
-
-      console.log("CALCULATED MOVES 1:", allMoveOptions);
-      console.log("ALL TOGETHER:", yourTurn && diceComplete && noOptions);
-
       if (yourTurn && diceComplete && noOptions) {
+        const cancelAfterFirstDice = diceResultsCopy.length > 1;
+        const time = cancelAfterFirstDice ? 6000 : 2000;
+        cancelAfterFirstDice && setNoOptions(true);
         setTimeout(() => {
           socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
           handleDiceComplete(false);
           setAllMoveOptions(null);
-        }, 1000);
+          setNoOptions(false);
+        }, time);
       }
+      changeStepControl("reset");
     }
-    changeStepControl("reset");
   }, [stepControl.moveOptionsUpdated, allMoveOptions]);
 
-  console.log("CALCULATED MOVES 2:", allMoveOptions);
+  // passing turn if no options availabe BEFORE dicing
+  useEffect(() => {
+    if (!yourTurn) return;
+
+    const yourPrisonId = gameState.yourColor === "black" ? 0 : 25;
+    const stonesInPrison = gameState.board[yourPrisonId].length !== 0;
+    const startingFieldOccupied = Object.values(gameState.board)
+      .filter((item, index) => {
+        return gameState.yourColor === "black"
+          ? index >= 1 && index < 7
+          : index > 18 && index <= 24;
+      })
+      .every((item) => item.length > 1 && item.color !== gameState.yourColor);
+
+    let timeOut;
+    if (yourTurn && stonesInPrison && startingFieldOccupied) {
+      setNoOptions(true);
+      handleDisableButton(true);
+      timeOut = setTimeout(() => {
+        socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
+        handleDiceComplete(false);
+        setAllMoveOptions(null);
+        setNoOptions(false);
+      }, 3000);
+      changeStepControl("reset");
+    }
+    return () => clearTimeout(timeOut);
+  }, [yourTurn]);
 
   // handling MOVING STONES onClick
   // UPDATES diceResultsCopy && gameState.board && sends message to WS
@@ -450,11 +475,6 @@ export default function GameBoard({
     { id: "25", color: "white", number: getStones("25") },
   ];
 
-  const isNoOption =
-    allMoveOptions !== null && diceResultsCopy.length !== 0
-      ? Object.keys(allMoveOptions).length === 0
-      : false;
-
   return (
     <>
       <div
@@ -471,9 +491,9 @@ export default function GameBoard({
             onLoad={handleUILoading}
           />
           <div
-            className={`absolute ${isNoOption ? `opacity-1` : `opacity-0`} right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 bg-red-500/40 px-[3vw] py-[1vh] font-semibold shadow-md shadow-red-500/50 backdrop-blur-sm transition-opacity`}
+            className={`absolute ${noOptions ? `opacity-1` : `opacity-0`} pointer-events-none right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 bg-red-500/20 px-[3vw] py-[1vh] text-sm font-semibold shadow-md shadow-red-300/20 backdrop-blur-sm transition-opacity md:text-xl`}
           >
-            Sorry, no Options
+            No Options
           </div>
 
           <div
@@ -487,7 +507,7 @@ export default function GameBoard({
                     id={id}
                     key={id}
                     onClick={() => onClickHandler(id)}
-                    className={`field relative ${id === selectedField ? `ring-4 ring-red-600` : ``}`}
+                    className={`field relative ${id === selectedField ? `bg-red-500/30 shadow-2xl shadow-red-500/30 ring ring-red-500/30` : ``}`}
                   >
                     <Image
                       key={index}
@@ -496,7 +516,7 @@ export default function GameBoard({
                       className={``}
                     />
                     <p
-                      className={`absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 ${color === "black" ? `text-white` : `text-black`}`}
+                      className={`absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 text-xs md:text-base ${color === "black" ? `text-white` : `text-black`}`}
                     >
                       {number}
                     </p>
@@ -517,7 +537,7 @@ export default function GameBoard({
                   onClick={() => {
                     onClickHandler(key);
                   }}
-                  className={`flex h-full flex-col items-center gap-[1.5%] rounded-md ${color === "black" ? `bg-gradient-to-b` : `bg-gradient-to-t`} from-zinc-300 to-orange-200 ${hasContent || isEndgame ? `opacity-1` : `opacity-0`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-8 ring-green-400 ring-offset-2` : ``}`}
+                  className={`flex h-full flex-col items-center gap-[1.5%] rounded-md ${color === "black" ? `bg-gradient-to-b` : `bg-gradient-to-t`} from-zinc-300 to-orange-200 ${hasContent || isEndgame ? `opacity-1` : `opacity-0`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-2 ring-green-400 ring-offset-2 md:ring-4` : ``}`}
                 >
                   {gameState.board[key].map((item, index) => {
                     return (

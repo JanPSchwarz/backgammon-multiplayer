@@ -79,19 +79,28 @@ const testBoard = {
   board: {
     whiteOut: [],
     blackOut: [],
-    0: [],
-    1: [
-      { id: 18, color: "white" },
-      { id: 19, color: "white" },
-      { id: 20, color: "white" },
+    0: [{ id: 21, color: "black" }],
+    1: [{ id: 18, color: "white" }, { id: 19, color: "white" }, ,],
+    2: [
       { id: 21, color: "white" },
       { id: 22, color: "white" },
     ],
-    2: [],
-    3: [],
-    4: [],
-    5: [],
-    6: [],
+    3: [
+      { id: 21, color: "white" },
+      { id: 22, color: "white" },
+    ],
+    4: [
+      { id: 21, color: "white" },
+      { id: 22, color: "white" },
+    ],
+    5: [
+      { id: 21, color: "white" },
+      { id: 22, color: "white" },
+    ],
+    6: [
+      { id: 21, color: "white" },
+      { id: 22, color: "white" },
+    ],
     7: [],
     8: [],
     9: [],
@@ -102,10 +111,7 @@ const testBoard = {
     14: [],
     15: [],
     16: [],
-    17: [
-      { id: 8, color: "black" },
-      { id: 9, color: "black" },
-    ],
+    17: [],
     18: [],
     19: [],
     20: [],

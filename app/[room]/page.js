@@ -157,7 +157,7 @@ export default function Home() {
   return (
     <>
       <div
-        className={`fixed flex h-screen w-screen flex-col items-center justify-center gap-10 ${boardLoaded ? `hidden` : `visible`} top-0 transition-opacity`}
+        className={`fixed z-[101] flex h-screen w-screen flex-col items-center justify-center gap-10 ${boardLoaded ? `hidden` : `visible`} top-0 transition-opacity`}
       >
         <Spinner className={`w-[50%] max-w-[250px]`} />
         <p>Loading Game...</p>
@@ -186,6 +186,7 @@ export default function Home() {
           handleDiceComplete={handleDiceComplete}
           handleDiceResultsCopy={handleDiceResultsCopy}
           handleGameBoardUI={handleGameBoardUI}
+          handleDisableButton={handleDisableButton}
         />
         <DiceControls
           socket={socketRef}
