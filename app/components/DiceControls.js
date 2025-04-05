@@ -87,12 +87,19 @@ export default function DiceControls({
             getComputedStyle(body).getPropertyValue("height").split("px")[0],
           );
 
+          const dpr = window.devicePixelRatio;
+          const newDiceScale = Math.max(
+            Math.round(0.0422 * window.innerWidth),
+            50,
+          );
+
           console.log("NEW WIDTH", newWidth);
           console.log("NEW HEIGHT", newHeight);
 
           Dice.renderer.setSize(newWidth, newHeight, true);
           Dice.camera.aspect = newWidth / newHeight;
           Dice.camera.updateProjectionMatrix();
+          Dice.DiceFactory.baseScale = newDiceScale;
         }, 100);
       }
 
