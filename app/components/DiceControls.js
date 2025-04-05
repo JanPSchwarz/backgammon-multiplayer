@@ -65,8 +65,32 @@ export default function DiceControls({
       canvas.height = canvas.height * dpr;
     }
 
+    function resizeCanvas() {
+      const body = document.querySelector("body");
+      if (canvas) {
+        setTimeout(() => {
+          const newWidth = getComputedStyle(body)
+            .getPropertyValue("width")
+            .split("px")[0];
+
+          const newHeight = getComputedStyle(body)
+            .getPropertyValue("height")
+            .split("px")[0];
+
+          canvas.width = newWidth * dpr;
+          canvas.height = newHeight * dpr;
+        }, 100);
+      }
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("orientationchange", resizeCanvas);
+
     return () => {
       if (canvas) canvas.remove();
+
+      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("orientationchange", resizeCanvas);
     };
   }, []);
 
@@ -74,7 +98,6 @@ export default function DiceControls({
   useEffect(() => {
     if (Dice) {
       Dice.renderer.setPixelRatio(window.devicePixelRatio);
-      console.log(Dice);
     }
   }, [Dice]);
 

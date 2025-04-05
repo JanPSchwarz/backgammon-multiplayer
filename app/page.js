@@ -86,8 +86,10 @@ export default function Room() {
 
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
-    return () =>
+    return () => {
       window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
+      setNewRoomId();
+    };
   }, []);
 
   // clipboard notification
