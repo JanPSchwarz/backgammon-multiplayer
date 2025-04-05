@@ -105,19 +105,20 @@ export default function DiceControls({
 
           console.log("NEW DICE SCALE", newDiceScale);
 
-          Dice.DiceFactory.baseScale = newDiceScale;
+          Dice.DiceFactory.baseScale = newDiceScale || 50;
           Dice.renderer.setSize(newWidth, newHeight, true);
           Dice.camera.aspect = newWidth / newHeight;
           Dice.camera.updateProjectionMatrix();
         }, 200);
       }
-
+      screen.orientation.addEventListener("change", resizeCanvas);
       window.addEventListener("resize", resizeCanvas);
-      window.addEventListener("orientationchange", resizeCanvas);
+      // window.addEventListener("orientationchange", resizeCanvas);
 
       return () => {
         window.removeEventListener("resize", resizeCanvas);
-        window.removeEventListener("orientationchange", resizeCanvas);
+        screen.orientation.removeEventListener("change", resizeCanvas);
+        // window.removeEventListener("orientationchange", resizeCanvas);
       };
     }
   }, [Dice]);
