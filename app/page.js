@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 
 export default function Room() {
   const [newRoomId, setNewRoomId] = useState();
+
   const [showText, setShowText] = useState(false);
   const [deviceCanShare, setDeviceCanShare] = useState(false);
 
@@ -85,8 +86,10 @@ export default function Room() {
 
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
-    return () =>
+    return () => {
       window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
+      setNewRoomId();
+    };
   }, []);
 
   // clipboard notification
@@ -147,7 +150,6 @@ export default function Room() {
       const data = {
         title: "Wanna play Backgammon?\n",
         url: `${newURL}`,
-        text: `\nURL: ${newURL}\n\nRoom id: ${newRoomId}\n`,
       };
 
       if (deviceCanShare) {
@@ -157,7 +159,7 @@ export default function Room() {
           console.log("error writing to clipboard:", error);
         }
       } else {
-        const text = `URL: ${newURL}\n\nRoom Id: ${newRoomId}`;
+        const text = `${newURL}`;
         try {
           await navigator.clipboard.writeText(text);
           setShowText(true);
