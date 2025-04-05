@@ -28,7 +28,10 @@ export default function DiceControls({
   // define and set DICE
   useEffect(() => {
     const dpr = window.devicePixelRatio;
-    const diceScale = Math.max(Math.round(0.0422 * window.innerWidth), 50);
+    const diceScale = Math.min(
+      Math.max(Math.round(0.06 * window.innerWidth), 50),
+      85,
+    );
 
     console.log("DPR:", dpr);
 
@@ -79,28 +82,34 @@ export default function DiceControls({
         const body = document.querySelector("body");
 
         setTimeout(() => {
-          const newWidth = Number(
-            getComputedStyle(body).getPropertyValue("width").split("px")[0],
-          );
+          // const newWidth = Number(
+          //   getComputedStyle(body).getPropertyValue("width").split("px")[0],
+          // );
 
-          const newHeight = Number(
-            getComputedStyle(body).getPropertyValue("height").split("px")[0],
-          );
+          // const newHeight = Number(
+          //   getComputedStyle(body).getPropertyValue("height").split("px")[0],
+          // );
+
+          const newWidth =
+            window.visualViewport?.width ||
+            document.documentElement.clientWidth;
+          const newHeight =
+            window.visualViewport?.height ||
+            document.documentElement.clientHeight;
 
           const dpr = window.devicePixelRatio;
-          const newDiceScale = Math.max(
-            Math.round(0.0422 * window.innerWidth),
-            50,
+          const newDiceScale = Math.min(
+            Math.max(Math.round(0.06 * window.innerWidth), 50),
+            85,
           );
 
-          console.log("NEW WIDTH", newWidth);
-          console.log("NEW HEIGHT", newHeight);
+          console.log("NEW DICE SCALE", newDiceScale);
 
+          Dice.DiceFactory.baseScale = newDiceScale;
           Dice.renderer.setSize(newWidth, newHeight, true);
           Dice.camera.aspect = newWidth / newHeight;
           Dice.camera.updateProjectionMatrix();
-          Dice.DiceFactory.baseScale = newDiceScale;
-        }, 100);
+        }, 200);
       }
 
       window.addEventListener("resize", resizeCanvas);
