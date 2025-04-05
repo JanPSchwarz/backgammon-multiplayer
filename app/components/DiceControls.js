@@ -65,32 +65,8 @@ export default function DiceControls({
       canvas.height = canvas.height * dpr;
     }
 
-    function resizeCanvas() {
-      const body = document.querySelector("body");
-      if (canvas) {
-        setTimeout(() => {
-          const newWidth = getComputedStyle(body)
-            .getPropertyValue("width")
-            .split("px")[0];
-
-          const newHeight = getComputedStyle(body)
-            .getPropertyValue("height")
-            .split("px")[0];
-
-          canvas.width = newWidth * dpr;
-          canvas.height = newHeight * dpr;
-        }, 100);
-      }
-    }
-
-    window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("orientationchange", resizeCanvas);
-
     return () => {
       if (canvas) canvas.remove();
-
-      window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("orientationchange", resizeCanvas);
     };
   }, []);
 
@@ -98,6 +74,33 @@ export default function DiceControls({
   useEffect(() => {
     if (Dice) {
       Dice.renderer.setPixelRatio(window.devicePixelRatio);
+
+      function resizeCanvas() {
+        const body = document.querySelector("body");
+
+        setTimeout(() => {
+          const newWidth = Number(
+            getComputedStyle(body).getPropertyValue("width").split("px")[0],
+          );
+
+          const newHeight = Number(
+            getComputedStyle(body).getPropertyValue("height").split("px")[0],
+          );
+
+          console.log("NEW WIDTH", newWidth);
+          console.log("NEW HEIGHT", newHeight);
+
+          Dice.renderer.setSize(newWidth, newHeight, true);
+        }, 100);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      window.addEventListener("orientationchange", resizeCanvas);
+
+      return () => {
+        window.removeEventListener("resize", resizeCanvas);
+        window.removeEventListener("orientationchange", resizeCanvas);
+      };
     }
   }, [Dice]);
 
