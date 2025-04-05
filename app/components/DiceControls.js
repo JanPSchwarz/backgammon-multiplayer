@@ -54,10 +54,34 @@ export default function DiceControls({
       canvas.style.pointerEvents = "none";
     }
 
+    let timeOut;
+    if (canvas) {
+      console.log("CHANGE CANVAS");
+
+      clearTimeout(timeOut);
+      timeOut = setTimeout(() => {
+        const body = document.querySelector("body");
+        const newWidth = getComputedStyle(body).getPropertyValue("width");
+        const newHeight = getComputedStyle(body).getPropertyValue("height");
+
+        console.log(getComputedStyle(body).getPropertyValue("width"));
+        const dpr = 1;
+        console.log("DPR:", dpr);
+
+        canvas.style.width = newWidth + `px`;
+        canvas.style.height = newHeight + `px`;
+        canvas.width = newWidth * dpr;
+        canvas.height = newHeight * dpr;
+      }, 100);
+    }
+
+    window.addEventListener("orientationchange", resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
 
     return () => {
       if (canvas) canvas.remove();
-
+      window.removeEventListener("orientationchange", resizeCanvas);
+      window.removeEventListener("resize", resizeCanvas);
     };
   }, []);
 
