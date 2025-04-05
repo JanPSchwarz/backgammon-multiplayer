@@ -3,6 +3,10 @@
 // import DiceBox from "@3d-dice/dice-box";
 import DiceBox from "@3d-dice/dice-box-threejs";
 import { useEffect, useState } from "react";
+import HomeIcon from "@/public/home.svg";
+import LeavePrompt from "../components/LeavePrompt";
+import DiceIcon from "@/public/dice.svg";
+import ShareIcon from "@/public/share.svg";
 
 export default function DiceControls({
   socket,
@@ -18,15 +22,21 @@ export default function DiceControls({
 }) {
   const [Dice, setDice] = useState(null);
 
+  //UI
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+
   // define and set DICE
   useEffect(() => {
+    const dpr = window.devicePixelRatio;
     const diceScale = Math.max(Math.round(0.0422 * window.innerWidth), 50);
+
+    console.log("DPR:", dpr);
 
     if (typeof window !== "undefined" && !Dice) {
       const DiceBoxInstance = new DiceBox("#app", {
         light_intensity: 1.5,
-        gravity_multiplier: 400,
-        strength: 1,
+        gravity_multiplier: 200,
+        strength: 10,
         baseScale: diceScale,
         assetPath: "/",
       });
@@ -40,7 +50,6 @@ export default function DiceControls({
           handleGameState("diceResults", values);
         }
       };
-
       DiceBoxInstance.initialize();
       setDice(DiceBoxInstance);
     }
@@ -52,40 +61,26 @@ export default function DiceControls({
       canvas.style.padding = "10px";
       canvas.style.zIndex = "100";
       canvas.style.pointerEvents = "none";
+      canvas.width = canvas.width * dpr;
+      canvas.height = canvas.height * dpr;
     }
-
-    function resizeCanvas() {
-      let timeOut;
-      if (canvas) {
-        console.log("CHANGE CANVAS");
-
-        clearTimeout(timeOut);
-        timeOut = setTimeout(() => {
-          const body = document.querySelector("body");
-          const newWidth = getComputedStyle(body).getPropertyValue("width");
-          const newHeight = getComputedStyle(body).getPropertyValue("height");
-
-          console.log(getComputedStyle(body).getPropertyValue("width"));
-          const dpr = 1;
-          console.log("DPR:", dpr);
-
-          canvas.style.width = newWidth + `px`;
-          canvas.style.height = newHeight + `px`;
-          canvas.width = newWidth * dpr;
-          canvas.height = newHeight * dpr;
-        }, 100);
-      }
-    }
-
-    window.addEventListener("orientationchange", resizeCanvas);
-    window.addEventListener("resize", resizeCanvas);
 
     return () => {
       if (canvas) canvas.remove();
-      window.removeEventListener("orientationchange", resizeCanvas);
-      window.removeEventListener("resize", resizeCanvas);
     };
   }, []);
+
+  // drawing canvas correctly ratio to dpr
+  useEffect(() => {
+    if (Dice) {
+      Dice.renderer.setPixelRatio(window.devicePixelRatio);
+      console.log(Dice);
+    }
+  }, [Dice]);
+
+  if (Dice) {
+    console.log("RENDERER PIXEL RATIO", Dice.renderer.getPixelRatio());
+  }
 
   // handle socket MESSAGES
   useEffect(() => {
@@ -131,6 +126,16 @@ export default function DiceControls({
     }
   }
 
+  function clearDice() {
+    if (Dice) {
+      Dice.renderer.clear();
+    }
+  }
+
+  function handleModal() {
+    setShowLeaveModal(false);
+  }
+
   // UI mapping
   const diceCount = diceResultsCopy.reduce((acc, num) => {
     acc[num] = (acc[num] || 0) + 1;
@@ -146,7 +151,7 @@ export default function DiceControls({
   return (
     <>
       <div
-        className={`relative flex w-full max-w-[250px] flex-col items-center justify-center portrait:w-[30%] landscape:w-[15%]`}
+        className={`relative flex max-h-min w-full flex-1 flex-col items-center justify-center portrait:mb-6 portrait:w-[30%] portrait:max-w-[250px] landscape:mr-4 landscape:w-[15%] landscape:max-w-[120px] landscape:md:max-w-[150px]`}
       >
         <p className={`text-center`}>{yourTurn ? "Your" : "Not Your"} turn!</p>
         <button
@@ -171,6 +176,24 @@ export default function DiceControls({
           })}
         </div>
       </div>
+      <button
+        onClick={() => {
+          setShowLeaveModal(true);
+        }}
+        className={`absolute bottom-0 right-0 z-10`}
+      >
+        <HomeIcon className={`m-2 size-10 fill-blue-500 md:size-10`} />
+      </button>
+      <button
+        onClick={clearDice}
+        className={`absolute right-0 top-0 m-1 rounded-full bg-gray-300 p-2`}
+      >
+        <DiceIcon className={`size-6 fill-red-400`} />
+        <div
+          className={`absolute right-1/2 top-1/2 h-0.5 w-4/5 translate-x-1/2 rotate-45 bg-red-400`}
+        ></div>
+      </button>
+      {showLeaveModal && <LeavePrompt closeModal={handleModal} />}
     </>
   );
 }

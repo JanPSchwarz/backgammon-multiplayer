@@ -478,7 +478,7 @@ export default function GameBoard({
   return (
     <>
       <div
-        className={`flex h-full w-full max-w-max select-none items-center justify-center`}
+        className={`flex flex-1 h-full w-full max-w-max select-none items-center justify-center`}
       >
         <div className={`relative max-h-max`}>
           <Image
