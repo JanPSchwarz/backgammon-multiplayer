@@ -91,6 +91,8 @@ export default function DiceControls({
           console.log("NEW HEIGHT", newHeight);
 
           Dice.renderer.setSize(newWidth, newHeight, true);
+          Dice.camera.aspect = newWidth / newHeight;
+          Dice.camera.updateProjectionMatrix();
         }, 100);
       }
 
@@ -106,6 +108,7 @@ export default function DiceControls({
 
   if (Dice) {
     console.log("RENDERER PIXEL RATIO", Dice.renderer.getPixelRatio());
+    console.log("CAMERA PERSPECTIVE", Dice);
   }
 
   // handle socket MESSAGES
