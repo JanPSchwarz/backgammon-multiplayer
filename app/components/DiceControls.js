@@ -117,10 +117,8 @@ export default function DiceControls({
             const timedOut = Date.now() - start > timeOut;
 
             if (matches || timedOut) {
-              console.log("orientation correctly detected");
               resolve();
             } else {
-              console.log("TIMED OUT");
               setTimeout(check, interval);
             }
           }
