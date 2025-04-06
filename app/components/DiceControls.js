@@ -92,8 +92,8 @@ export default function DiceControls({
             85,
           );
 
-          Dice.DiceFactory.baseScale = newDiceScale || 50;
-          Dice.renderer.setSize(newWidth, newHeight, true);
+          Dice.DiceFactory.baseScale = newDiceScale;
+          Dice.renderer.setSize(newWidth, newHeight, false);
           Dice.camera.aspect = newWidth / newHeight;
           Dice.camera.updateProjectionMatrix();
         }, 200);
@@ -135,17 +135,21 @@ export default function DiceControls({
         });
       });
 
-      window.addEventListener("resize", resizeCanvas);
-      // window.addEventListener("orientationchange", resizeCanvas);
+      window.addEventListener("resize", () => {
+        const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (!isIos) {
+          resizeCanvas();
+        }
+      });
 
       return () => {
         window.removeEventListener("resize", resizeCanvas);
         screen.orientation.removeEventListener("change", resizeCanvas);
-        // window.removeEventListener("orientationchange", resizeCanvas);
       };
     }
   }, [Dice]);
 
+  console.log(window);
   if (Dice) {
     console.log("RENDERER PIXEL RATIO", Dice.renderer.getPixelRatio());
     console.log("CAMERA PERSPECTIVE", Dice);
