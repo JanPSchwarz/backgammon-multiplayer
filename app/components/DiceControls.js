@@ -40,8 +40,8 @@ export default function DiceControls({
     if (typeof window !== "undefined" && !Dice) {
       const DiceBoxInstance = new DiceBox("#app", {
         light_intensity: 1.5,
-        gravity_multiplier: 200,
-        strength: 10,
+        gravity_multiplier: 400,
+        strength: 1.5,
         baseScale: diceScale,
         assetPath: "/",
       });
