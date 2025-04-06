@@ -4,14 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { uid } from "uid";
 import PWAManual from "./components/PWAManual";
-import ShareIcon from "@/public/share.svg";
 import { useRouter } from "next/navigation";
 
 export default function Room() {
   const [newRoomId, setNewRoomId] = useState();
-
-  const [showText, setShowText] = useState(false);
-  const [deviceCanShare, setDeviceCanShare] = useState(false);
 
   const [pwaNOTinstalled, setpwaNOTinstalled] = useState(false);
   const [storedPrompt, setStorePrompt] = useState(false);
@@ -92,26 +88,6 @@ export default function Room() {
     };
   }, []);
 
-  // clipboard notification
-  useEffect(() => {
-    let timeOut;
-    if (showText) {
-      timeOut = setTimeout(() => {
-        setShowText(false);
-      }, 3500);
-    }
-
-    return () => clearTimeout(timeOut);
-  }, [showText]);
-
-  // share capability
-  useEffect(() => {
-    const canShare = !!navigator.share;
-    if (canShare) {
-      setDeviceCanShare(true);
-    }
-  }, []);
-
   useEffect(() => {
     if (noRoom) {
       setTimeout(() => {
@@ -140,34 +116,6 @@ export default function Room() {
 
   function handleShowManual() {
     setShowManualForPWA(false);
-  }
-
-  async function shareLink() {
-    if (newRoomId) {
-      const baseURL = window.location.href;
-      const newURL = `${baseURL}${newRoomId}`;
-
-      const data = {
-        title: "Wanna play Backgammon?\n",
-        url: `${newURL}`,
-      };
-
-      if (deviceCanShare) {
-        try {
-          await navigator.share(data);
-        } catch (error) {
-          console.log("error writing to clipboard:", error);
-        }
-      } else {
-        const text = `${newURL}`;
-        try {
-          await navigator.clipboard.writeText(text);
-          setShowText(true);
-        } catch (error) {
-          console.log("error writing to clipboard:", error);
-        }
-      }
-    }
   }
 
   function handleSubmit(event) {
@@ -210,17 +158,6 @@ export default function Room() {
         >
           Your room is ready
         </Link>
-        <button
-          className={`absolute -right-1 translate-x-[100%]`}
-          onClick={shareLink}
-        >
-          <ShareIcon className={`size-10 rounded-md bg-indigo-300 p-1`} />
-        </button>
-        <p
-          className={`pointer-events-none absolute max-h-min w-full rounded-md bg-slate-400 bg-opacity-20 p-2 text-center text-sm transition-all duration-300 ${showText ? `opacity-1 top-[200%]` : `top-[150%] opacity-0`}`}
-        >
-          Link copied! Share with a friend ❤️
-        </p>
       </div>
       <form
         onSubmit={handleSubmit}

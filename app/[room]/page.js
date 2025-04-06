@@ -103,19 +103,19 @@ export default function Home() {
   }, []);
 
   // adding HANDLER before LEAVING page
-  useEffect(() => {
-    function beforeUnload(event) {
-      event.preventDefault();
+  // useEffect(() => {
+  //   function beforeUnload(event) {
+  //     event.preventDefault();
 
-      event.returnValue = true;
-    }
+  //     event.returnValue = true;
+  //   }
 
-    window.addEventListener("beforeunload", beforeUnload);
+  //   window.addEventListener("beforeunload", beforeUnload);
 
-    return () => {
-      window.removeEventListener("beforeunload", beforeUnload);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", beforeUnload);
+  //   };
+  // }, []);
 
   // logging
   //   Object.entries(gameState).map(([key, value]) => {

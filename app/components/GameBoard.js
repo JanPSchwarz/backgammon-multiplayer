@@ -478,7 +478,7 @@ export default function GameBoard({
   return (
     <>
       <div
-        className={`flex flex-1 h-full w-full max-w-max select-none items-center justify-center`}
+        className={`flex h-full w-full max-w-max flex-1 select-none items-center justify-center`}
       >
         <div className={`relative max-h-max`}>
           <Image
@@ -582,9 +582,9 @@ export default function GameBoard({
                                 className={twMerge(
                                   fieldStyles,
                                   `relative grid grid-cols-1 ${isBottom ? `rounded-t-xl` : `rounded-b-xl`}`,
-                                  `${id === selectedField ? `bg-red-500/30 shadow-2xl shadow-red-500/30 ring ring-inset ring-red-500/30` : ``}`,
-                                  `${showOptions?.singleDiceOptions?.includes(id) ? `bg-blue-500/40 shadow-2xl shadow-blue-400/50 ring ring-inset ring-blue-400/50` : ``}`,
-                                  `${showOptions?.combinedOptions?.includes(id) ? `bg-orange-400/30 shadow-2xl shadow-orange-400/30 ring ring-inset ring-orange-400/30` : ``}`,
+                                  `${id === selectedField ? `bg-red-500/40 shadow-2xl shadow-red-500/50 ring-inset ring-red-500/30` : ``}`,
+                                  `${showOptions?.singleDiceOptions?.includes(id) ? `bg-blue-500/50 shadow-2xl shadow-blue-400/50 ring-inset ring-blue-400/50` : ``}`,
+                                  `${showOptions?.combinedOptions?.includes(id) ? `bg-orange-400/40 shadow-2xl shadow-orange-400/30 ring-inset ring-orange-400/30` : ``}`,
                                 )}
                               >
                                 {gameState.board[id]?.map(

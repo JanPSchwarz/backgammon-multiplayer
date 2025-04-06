@@ -7,6 +7,7 @@ import HomeIcon from "@/public/home.svg";
 import LeavePrompt from "../components/LeavePrompt";
 import DiceIcon from "@/public/dice.svg";
 import ShareIcon from "@/public/share.svg";
+import SharePrompt from "./SharePrompt";
 
 export default function DiceControls({
   socket,
@@ -24,6 +25,7 @@ export default function DiceControls({
 
   //UI
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // define and set DICE
   useEffect(() => {
@@ -147,12 +149,6 @@ export default function DiceControls({
     }
   }, [Dice]);
 
-  console.log(window);
-  if (Dice) {
-    console.log("RENDERER PIXEL RATIO", Dice.renderer.getPixelRatio());
-    console.log("CAMERA PERSPECTIVE", Dice);
-  }
-
   // handle socket MESSAGES
   useEffect(() => {
     if (!socket.current) return;
@@ -203,8 +199,12 @@ export default function DiceControls({
     }
   }
 
-  function handleModal() {
-    setShowLeaveModal(false);
+  function handleLeaveModal() {
+    setShowLeaveModal(!showLeaveModal);
+  }
+
+  function handleShareModal() {
+    setShowShareModal(!showShareModal);
   }
 
   // UI mapping
@@ -247,24 +247,39 @@ export default function DiceControls({
           })}
         </div>
       </div>
-      <button
-        onClick={() => {
-          setShowLeaveModal(true);
-        }}
-        className={`absolute bottom-0 right-0 z-10`}
+      <div
+        className={`absolute right-0 z-10 flex h-full mr-1 flex-col items-center justify-between py-2`}
       >
-        <HomeIcon className={`m-2 size-10 fill-blue-500 md:size-10`} />
-      </button>
-      <button
-        onClick={clearDice}
-        className={`absolute right-0 top-0 m-1 rounded-full bg-gray-300 p-2`}
-      >
-        <DiceIcon className={`size-6 fill-red-400`} />
-        <div
-          className={`absolute right-1/2 top-1/2 h-0.5 w-4/5 translate-x-1/2 rotate-45 bg-red-400`}
-        ></div>
-      </button>
-      {showLeaveModal && <LeavePrompt closeModal={handleModal} />}
+        <button
+          onClick={clearDice}
+          className={`relative flex aspect-square max-w-min items-center justify-center rounded-full border border-black/50 bg-gray-300`}
+        >
+          <DiceIcon className={`m-2 size-6 fill-red-400`} />
+          <div
+            className={`absolute right-1/2 top-1/2 h-0.5 w-4/5 translate-x-1/2 rotate-45 bg-red-400`}
+          ></div>
+        </button>
+        <div className={`flex flex-col items-center gap-1`}>
+          <button
+            onClick={handleShareModal}
+            className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
+          >
+            <ShareIcon className={`m-1 size-8 fill-slate-100/90`} />
+          </button>
+          <div className={`flex flex-col items-center gap-1`}>
+            <button
+              onClick={handleLeaveModal}
+              className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
+            >
+              <HomeIcon className={`m-0.5 size-9 fill-slate-100/90`} />
+            </button>
+          </div>
+        </div>
+      </div>
+      {showLeaveModal && <LeavePrompt closeModal={handleLeaveModal} />}
+      {showShareModal && (
+        <SharePrompt closeModal={handleShareModal} roomId={roomId} />
+      )}
     </>
   );
 }
