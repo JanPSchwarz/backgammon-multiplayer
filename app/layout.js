@@ -9,14 +9,19 @@ const manrope = Manrope({
 });
 
 export const metadata = allMetaData;
-export const viewport = { themeColor: "#FFFFFF" };
+export const viewport = {
+  themeColor: "#FFFFFF",
+  width: `device-width`,
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
         id="app"
-        className={`${manrope.variable} relative flex h-dvh w-dvw flex-row items-center justify-center overflow-hidden bg-gradient-to-tl from-indigo-100 to-stone-300 antialiased md:p-4`}
+        className={`${manrope.variable} relative flex h-dvh w-dvw flex-row items-center justify-center overflow-hidden overscroll-none !scroll-auto bg-gradient-to-tl from-indigo-100 to-stone-300 antialiased md:p-4`}
       >
         {children}
       </body>

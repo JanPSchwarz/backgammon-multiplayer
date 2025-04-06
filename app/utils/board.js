@@ -22,9 +22,9 @@ const board = [
     },
     {
       fields: [19, 20, 21, 22, 23, 24],
-      areaStyles: `w-[90%] translate-x-[-3.5%]`,
+      areaStyles: `w-[90%] translate-x-[-2%]`,
       fieldStyles: ` place-content-end`,
-      stoneStyles: `bottom-0`,
+      stoneStyles: `bottom-0 translate-x-[-5%]`,
     },
   ],
 ];

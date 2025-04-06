@@ -3,6 +3,11 @@
 // import DiceBox from "@3d-dice/dice-box";
 import DiceBox from "@3d-dice/dice-box-threejs";
 import { useEffect, useState } from "react";
+import HomeIcon from "@/public/home.svg";
+import LeavePrompt from "../components/LeavePrompt";
+import DiceIcon from "@/public/dice.svg";
+import ShareIcon from "@/public/share.svg";
+import SharePrompt from "./SharePrompt";
 
 export default function DiceControls({
   socket,
@@ -18,15 +23,25 @@ export default function DiceControls({
 }) {
   const [Dice, setDice] = useState(null);
 
+  //UI
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+
   // define and set DICE
   useEffect(() => {
-    const diceScale = Math.max(Math.round(0.0422 * window.innerWidth), 50);
+    const dpr = window.devicePixelRatio;
+    const diceScale = Math.min(
+      Math.max(Math.round(0.06 * window.innerWidth), 40),
+      85,
+    );
+
+    console.log("DPR:", dpr);
 
     if (typeof window !== "undefined" && !Dice) {
       const DiceBoxInstance = new DiceBox("#app", {
         light_intensity: 1.5,
-        gravity_multiplier: 400,
-        strength: 1,
+        gravity_multiplier: 200,
+        strength: 10,
         baseScale: diceScale,
         assetPath: "/",
       });
@@ -40,7 +55,6 @@ export default function DiceControls({
           handleGameState("diceResults", values);
         }
       };
-
       DiceBoxInstance.initialize();
       setDice(DiceBoxInstance);
     }
@@ -52,14 +66,88 @@ export default function DiceControls({
       canvas.style.padding = "10px";
       canvas.style.zIndex = "100";
       canvas.style.pointerEvents = "none";
+      canvas.width = canvas.width * dpr;
+      canvas.height = canvas.height * dpr;
     }
-
 
     return () => {
       if (canvas) canvas.remove();
-
     };
   }, []);
+
+  // drawing canvas correctly ratio to dpr
+  useEffect(() => {
+    if (Dice) {
+      Dice.renderer.setPixelRatio(window.devicePixelRatio);
+
+      function resizeCanvas() {
+        setTimeout(() => {
+          const newWidth =
+            window.visualViewport?.width ||
+            document.documentElement.clientWidth;
+          const newHeight =
+            window.visualViewport?.height ||
+            document.documentElement.clientHeight;
+
+          const newDiceScale = Math.min(
+            Math.max(Math.round(0.06 * window.innerWidth), 40),
+            85,
+          );
+
+          Dice.DiceFactory.baseScale = newDiceScale;
+          Dice.renderer.setSize(newWidth, newHeight, false);
+          Dice.camera.aspect = newWidth / newHeight;
+          Dice.camera.updateProjectionMatrix();
+        }, 200);
+      }
+
+      function waitForOrientationChange() {
+        const timeOut = 1000;
+        const interval = 50;
+
+        return new Promise((resolve) => {
+          const start = Date.now();
+          const targetIsLandscape =
+            screen.orientation.type.includes("landscape");
+
+          function check() {
+            const width = window.innerWidth;
+            const height = window.innerWidth;
+            const isLandscape = width > height;
+
+            const matches = targetIsLandscape === isLandscape;
+            const timedOut = Date.now() - start > timeOut;
+
+            if (matches || timedOut) {
+              resolve();
+            } else {
+              setTimeout(check, interval);
+            }
+          }
+
+          check();
+        });
+      }
+
+      screen.orientation.addEventListener("change", () => {
+        waitForOrientationChange().then(() => {
+          resizeCanvas();
+        });
+      });
+
+      window.addEventListener("resize", () => {
+        const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (!isIos) {
+          resizeCanvas();
+        }
+      });
+
+      return () => {
+        window.removeEventListener("resize", resizeCanvas);
+        screen.orientation.removeEventListener("change", resizeCanvas);
+      };
+    }
+  }, [Dice]);
 
   // handle socket MESSAGES
   useEffect(() => {
@@ -105,6 +193,20 @@ export default function DiceControls({
     }
   }
 
+  function clearDice() {
+    if (Dice) {
+      Dice.renderer.clear();
+    }
+  }
+
+  function handleLeaveModal() {
+    setShowLeaveModal(!showLeaveModal);
+  }
+
+  function handleShareModal() {
+    setShowShareModal(!showShareModal);
+  }
+
   // UI mapping
   const diceCount = diceResultsCopy.reduce((acc, num) => {
     acc[num] = (acc[num] || 0) + 1;
@@ -120,7 +222,7 @@ export default function DiceControls({
   return (
     <>
       <div
-        className={`relative flex w-full max-w-[250px] flex-col items-center justify-center portrait:w-[30%] landscape:w-[15%]`}
+        className={`relative flex max-h-min w-full flex-1 flex-col items-center justify-center portrait:mb-6 portrait:w-[30%] portrait:max-w-[250px] landscape:mr-4 landscape:w-[15%] landscape:max-w-[120px] landscape:md:max-w-[150px]`}
       >
         <p className={`text-center`}>{yourTurn ? "Your" : "Not Your"} turn!</p>
         <button
@@ -145,6 +247,39 @@ export default function DiceControls({
           })}
         </div>
       </div>
+      <div
+        className={`absolute right-0 z-10 flex h-full mr-1 flex-col items-center justify-between py-2`}
+      >
+        <button
+          onClick={clearDice}
+          className={`relative flex aspect-square max-w-min items-center justify-center rounded-full border border-black/50 bg-gray-300`}
+        >
+          <DiceIcon className={`m-2 size-6 fill-red-400`} />
+          <div
+            className={`absolute right-1/2 top-1/2 h-0.5 w-4/5 translate-x-1/2 rotate-45 bg-red-400`}
+          ></div>
+        </button>
+        <div className={`flex flex-col items-center gap-1`}>
+          <button
+            onClick={handleShareModal}
+            className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
+          >
+            <ShareIcon className={`m-1 size-8 fill-slate-100/90`} />
+          </button>
+          <div className={`flex flex-col items-center gap-1`}>
+            <button
+              onClick={handleLeaveModal}
+              className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
+            >
+              <HomeIcon className={`m-0.5 size-9 fill-slate-100/90`} />
+            </button>
+          </div>
+        </div>
+      </div>
+      {showLeaveModal && <LeavePrompt closeModal={handleLeaveModal} />}
+      {showShareModal && (
+        <SharePrompt closeModal={handleShareModal} roomId={roomId} />
+      )}
     </>
   );
 }
