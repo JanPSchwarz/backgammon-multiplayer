@@ -92,15 +92,49 @@ export default function DiceControls({
             85,
           );
 
-          console.log("NEW DICE SCALE", newDiceScale);
-
           Dice.DiceFactory.baseScale = newDiceScale || 50;
           Dice.renderer.setSize(newWidth, newHeight, true);
           Dice.camera.aspect = newWidth / newHeight;
           Dice.camera.updateProjectionMatrix();
-        }, 500);
+        }, 200);
       }
-      screen.orientation.addEventListener("change", resizeCanvas);
+
+      function waitForOrientationChange() {
+        const timeOut = 1000;
+        const interval = 50;
+
+        return new Promise((resolve) => {
+          const start = Date.now();
+          const targetIsLandscape =
+            screen.orientation.type.includes("landscape");
+
+          function check() {
+            const width = window.innerWidth;
+            const height = window.innerWidth;
+            const isLandscape = width > height;
+
+            const matches = targetIsLandscape === isLandscape;
+            const timedOut = Date.now() - start > timeOut;
+
+            if (matches || timedOut) {
+              console.log("orientation correctly detected");
+              resolve();
+            } else {
+              console.log("TIMED OUT");
+              setTimeout(check, interval);
+            }
+          }
+
+          check();
+        });
+      }
+
+      screen.orientation.addEventListener("change", () => {
+        waitForOrientationChange().then(() => {
+          resizeCanvas();
+        });
+      });
+
       window.addEventListener("resize", resizeCanvas);
       // window.addEventListener("orientationchange", resizeCanvas);
 
