@@ -29,7 +29,7 @@ export default function DiceControls({
   useEffect(() => {
     const dpr = window.devicePixelRatio;
     const diceScale = Math.min(
-      Math.max(Math.round(0.06 * window.innerWidth), 30),
+      Math.max(Math.round(0.06 * window.innerWidth), 40),
       85,
     );
 
@@ -79,39 +79,28 @@ export default function DiceControls({
       Dice.renderer.setPixelRatio(window.devicePixelRatio);
 
       function resizeCanvas() {
-        // setTimeout(() => {
-        const newWidth =
-          window.visualViewport?.width || document.documentElement.clientWidth;
-        const newHeight =
-          window.visualViewport?.height ||
-          document.documentElement.clientHeight;
+        setTimeout(() => {
+          const newWidth =
+            window.visualViewport?.width ||
+            document.documentElement.clientWidth;
+          const newHeight =
+            window.visualViewport?.height ||
+            document.documentElement.clientHeight;
 
-        const newDiceScale = Math.min(
-          Math.max(Math.round(0.06 * window.innerWidth), 30),
-          85,
-        );
+          const newDiceScale = Math.min(
+            Math.max(Math.round(0.06 * window.innerWidth), 40),
+            85,
+          );
 
-        console.log("NEW DICE SCALE", newDiceScale);
+          console.log("NEW DICE SCALE", newDiceScale);
 
-        Dice.DiceFactory.baseScale = newDiceScale || 50;
-        Dice.renderer.setSize(newWidth, newHeight, true);
-        Dice.camera.aspect = newWidth / newHeight;
-        Dice.camera.updateProjectionMatrix();
-        // }, 200);
+          Dice.DiceFactory.baseScale = newDiceScale || 50;
+          Dice.renderer.setSize(newWidth, newHeight, true);
+          Dice.camera.aspect = newWidth / newHeight;
+          Dice.camera.updateProjectionMatrix();
+        }, 500);
       }
-      screen.orientation.addEventListener("change", () => {
-        let count = 0;
-        const maxCount = 10;
-
-        function tryResize() {
-          resizeCanvas();
-          count++;
-          if (count < max) {
-            requestAnimationFrame(tryResize);
-          }
-        }
-        requestAnimationFrame(tryResize);
-      });
+      screen.orientation.addEventListener("change", resizeCanvas);
       window.addEventListener("resize", resizeCanvas);
       // window.addEventListener("orientationchange", resizeCanvas);
 
