@@ -1,6 +1,5 @@
 "use client";
 
-// import DiceBox from "@3d-dice/dice-box";
 import DiceBox from "@3d-dice/dice-box-threejs";
 import { useEffect, useState } from "react";
 import HomeIcon from "@/public/home.svg";
@@ -35,12 +34,10 @@ export default function DiceControls({
       85,
     );
 
-    console.log("DPR:", dpr);
-
     if (typeof window !== "undefined" && !Dice) {
       const DiceBoxInstance = new DiceBox("#app", {
         light_intensity: 1.5,
-        gravity_multiplier: 400,
+        gravity_multiplier: 200,
         strength: 1.5,
         baseScale: diceScale,
         assetPath: "/",
@@ -62,7 +59,7 @@ export default function DiceControls({
     const canvas = document.querySelector(`#app canvas`);
 
     if (canvas) {
-      canvas.style.position = "fixed";
+      canvas.style.position = "absolute";
       canvas.style.padding = "10px";
       canvas.style.zIndex = "100";
       canvas.style.pointerEvents = "none";
@@ -222,7 +219,7 @@ export default function DiceControls({
   return (
     <>
       <div
-        className={`relative flex max-h-min w-full flex-1 flex-col items-center justify-center portrait:mb-6 portrait:w-[30%] portrait:max-w-[250px] landscape:mr-4 landscape:w-[15%] landscape:max-w-[120px] landscape:md:max-w-[150px]`}
+        className={`relative z-10 flex max-h-min w-full flex-1 flex-col items-center justify-center portrait:mb-6 portrait:w-[30%] portrait:max-w-[250px] landscape:mr-4 landscape:w-[15%] landscape:max-w-[120px] landscape:md:max-w-[150px]`}
       >
         <p className={`text-center`}>{yourTurn ? "Your" : "Not Your"} turn!</p>
         <button
@@ -248,28 +245,30 @@ export default function DiceControls({
         </div>
       </div>
       <div
-        className={`absolute right-0 z-10 flex h-full mr-1 flex-col items-center justify-between py-2`}
+        className={`absolute right-0 mr-1 flex h-full flex-col items-end justify-between py-2`}
       >
         <button
           onClick={clearDice}
-          className={`relative flex aspect-square max-w-min items-center justify-center rounded-full border border-black/50 bg-gray-300`}
+          className={`relative flex aspect-square max-w-min items-center justify-center rounded-full border border-black/50 bg-gray-300 active:scale-90`}
         >
           <DiceIcon className={`m-2 size-6 fill-red-400`} />
           <div
             className={`absolute right-1/2 top-1/2 h-0.5 w-4/5 translate-x-1/2 rotate-45 bg-red-400`}
           ></div>
         </button>
-        <div className={`flex flex-col items-center gap-1`}>
+        <div
+          className={`flex flex-col items-center gap-1 landscape:flex-row landscape:md:flex-col`}
+        >
           <button
             onClick={handleShareModal}
-            className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
+            className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100 active:scale-90`}
           >
             <ShareIcon className={`m-1 size-8 fill-slate-100/90`} />
           </button>
           <div className={`flex flex-col items-center gap-1`}>
             <button
               onClick={handleLeaveModal}
-              className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
+              className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100 active:scale-90`}
             >
               <HomeIcon className={`m-0.5 size-9 fill-slate-100/90`} />
             </button>

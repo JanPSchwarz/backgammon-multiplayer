@@ -26,7 +26,13 @@ wss.on("connection", (ws) => {
       const roomId = data.roomId;
 
       if (!rooms[roomId]) {
-        rooms[roomId] = { players: [], sockets: {}, turn: null };
+        rooms[roomId] = {
+          players: [],
+          sockets: {},
+          turn: null,
+          board: null,
+          colors: [],
+        };
         ws.send(JSON.stringify({ type: "room-created", roomId }));
         logRoom();
       } else {
@@ -59,12 +65,30 @@ wss.on("connection", (ws) => {
       if (rooms[roomId]) {
         rooms[roomId].players.push(ws.id);
         rooms[roomId].sockets[ws.id] = ws;
+
+        const otherPlayer = rooms[roomId].players.filter(
+          (player) => player !== ws.id,
+        )[0];
+
         rooms[roomId].turn =
-          rooms[roomId].players.length === 1 ? ws.id : rooms[roomId].turn;
+          rooms[roomId].players.length === 1
+            ? ws.id
+            : rooms[roomId].turn === undefined
+              ? ws.id
+              : otherPlayer;
 
-        const color = rooms[roomId].players.length === 1 ? "black" : "white";
+        const alreadyGivenColor = rooms[roomId].colors
+          .filter((item) => item?.client !== ws.id)
+          .map((item) => item?.color)[0];
 
-        console.log(rooms[roomId].players.length);
+        const yourColor =
+          rooms[roomId].colors.length === 0
+            ? "black"
+            : alreadyGivenColor === "black"
+              ? "white"
+              : "black";
+
+        rooms[roomId].colors.push({ client: ws.id, color: yourColor });
 
         ws.send(
           JSON.stringify({
@@ -72,10 +96,14 @@ wss.on("connection", (ws) => {
             roomId,
             id: ws.id,
             turn: rooms[roomId].turn,
-            color,
+            color: yourColor,
+            board: rooms[roomId]?.board,
           }),
         );
-        broadCastToOtherPlayer(roomId, ws, { type: "player-joined" });
+        broadCastToOtherPlayer(roomId, ws, {
+          type: "player-joined",
+          turn: rooms[roomId].turn,
+        });
         logRoom();
         return;
       } else {
@@ -86,6 +114,7 @@ wss.on("connection", (ws) => {
     if (data.type === "make-move") {
       const newBoard = data.board;
       const roomId = data.roomId;
+      rooms[roomId].board = newBoard;
       broadCastToOtherPlayer(roomId, ws, { type: "new-move", board: newBoard });
     }
 
@@ -103,6 +132,8 @@ wss.on("connection", (ws) => {
           type: "switch-turn",
           turn: otherPlayer,
         });
+      } else {
+        rooms[roomId].turn = undefined;
       }
     }
 
@@ -128,6 +159,13 @@ wss.on("connection", (ws) => {
         rooms[roomId].players = rooms[roomId].players.filter(
           (playerId) => playerId !== ws.id,
         );
+
+        rooms[roomId].colors = rooms[roomId].colors.filter(
+          (item) => item.client !== ws.id,
+        );
+
+        rooms[roomId].turn =
+          rooms[roomId].turn === ws.id ? undefined : rooms[roomId].turn;
 
         if (Object.keys(rooms[roomId].sockets).length === 0) {
           delete rooms[roomId];

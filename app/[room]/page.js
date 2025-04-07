@@ -50,10 +50,15 @@ export default function Home() {
         handleGameState("yourId", message.id);
         handleGameState("currentTurn", message.turn);
         handleGameState("yourColor", message.color);
+
+        if (message.board !== null) {
+          handleGameState("board", message.board);
+        }
       }
 
       if (message.type === "player-joined") {
         console.log("another player-joined");
+        handleGameState("currentTurn", message.turn);
       }
 
       if (message.type === "player-left") {
@@ -85,6 +90,9 @@ export default function Home() {
   // UI updates
   useEffect(() => {
     const yourId = gameState.yourId;
+
+    console.log("TEST:", yourId);
+    console.log("TEST:", gameState.currentTurn);
 
     if (yourId === gameState.currentTurn) {
       setYourTurn(true);
@@ -118,11 +126,11 @@ export default function Home() {
   // }, []);
 
   // logging
-  //   Object.entries(gameState).map(([key, value]) => {
-  //     if (key !== "board") {
-  //       console.log(`${key}:`, value);
-  //     }
-  //   });
+  Object.entries(gameState).map(([key, value]) => {
+    if (key !== "board") {
+      console.log(`${key}:`, value);
+    }
+  });
 
   // helper functions
   function handleDisableButton(value) {
