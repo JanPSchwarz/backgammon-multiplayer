@@ -32,6 +32,7 @@ wss.on("connection", (ws) => {
           turn: null,
           board: null,
           colors: [],
+          wasDisconnect: false,
         };
         ws.send(JSON.stringify({ type: "room-created", roomId }));
         logRoom();
@@ -103,6 +104,7 @@ wss.on("connection", (ws) => {
         broadCastToOtherPlayer(roomId, ws, {
           type: "player-joined",
           turn: rooms[roomId].turn,
+          wasDisconnect: rooms[roomId].wasDisconnect,
         });
         logRoom();
         return;
@@ -166,6 +168,8 @@ wss.on("connection", (ws) => {
 
         rooms[roomId].turn =
           rooms[roomId].turn === ws.id ? undefined : rooms[roomId].turn;
+
+        rooms[roomId].wasDisconnect = true;
 
         if (Object.keys(rooms[roomId].sockets).length === 0) {
           delete rooms[roomId];

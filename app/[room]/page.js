@@ -12,10 +12,14 @@ export default function Home() {
   const socketRef = useRef();
 
   //Game logic
+  const [statusText, setStatusText] = useState();
+  const [oponentDisconnect, setOpponentDisconnect] = useState(false);
   const [gameState, setGameState] = useState(intialGameState);
   const [diceComplete, setDiceComplete] = useState(false);
   const [diceResultsCopy, setDiceResultsCopy] = useState([]);
   const [yourTurn, setYourTurn] = useState();
+
+  console.log("DISONNECT:", oponentDisconnect);
 
   // UI
   const [disableButton, setDisableButton] = useState(false);
@@ -59,10 +63,16 @@ export default function Home() {
       if (message.type === "player-joined") {
         console.log("another player-joined");
         handleGameState("currentTurn", message.turn);
+        if (message.wasDisconnect) {
+          setOpponentDisconnect(false);
+          setStatusText("Opponent reconnected!");
+        }
       }
 
       if (message.type === "player-left") {
         console.log("player left the room");
+        setOpponentDisconnect(true);
+        setStatusText("Opponent disconnected...");
       }
 
       if (message.type === "switch-turn") {
@@ -103,6 +113,14 @@ export default function Home() {
     }
   }, [gameState.currentTurn]);
 
+  useEffect(() => {
+    const timeOut = setTimeout(() => {
+      setStatusText();
+    }, 3000);
+
+    return () => clearTimeout(timeOut);
+  }, [statusText]);
+
   // detect PWA
   useEffect(() => {
     if (window.matchMedia(`(display-mode: standalone)`).matches) {
@@ -110,7 +128,7 @@ export default function Home() {
     }
   }, []);
 
-  // adding HANDLER before LEAVING page
+  // adding PROMPT before LEAVING page
   // useEffect(() => {
   //   function beforeUnload(event) {
   //     event.preventDefault();
@@ -164,7 +182,11 @@ export default function Home() {
         <p>Loading Game...</p>
       </div>
       <div
-        id="gameboard"
+        className={`absolute top-0 z-20 ${boardLoaded ? `opacity-1` : `opacity-0`} ${statusText ? `translate-y-0` : `translate-y-[-100%] duration-0`} rounded-b-md transition-all ${oponentDisconnect ? `border-red-400 bg-red-200/90 text-red-800` : `border-blue-400 bg-blue-50/80 text-blue-800`} border-t-0 border p-4 font-semibold md:text-lg`}
+      >
+        <p className={``}>{statusText}</p>
+      </div>
+      <div
         className={`relative flex h-full w-full items-center justify-center gap-4 portrait:flex-col ${boardLoaded ? `opacity-1` : `opacity-0`} transition-opacity duration-500 landscape:flex-row`}
       >
         <GameBoard

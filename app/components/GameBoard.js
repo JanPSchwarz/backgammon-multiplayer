@@ -491,7 +491,7 @@ export default function GameBoard({
             onLoad={handleUILoading}
           />
           <div
-            className={`absolute ${noOptions ? `opacity-1` : `opacity-0`} pointer-events-none right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 bg-red-500/20 px-[3vw] py-[1vh] text-sm font-semibold shadow-md shadow-red-300/20 backdrop-blur-sm transition-opacity md:text-xl`}
+            className={`absolute ${noOptions ? `opacity-1` : `opacity-0`} pointer-events-none right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 border border-red-400 bg-red-200/70 px-[3vw] py-[1vh] text-sm font-semibold text-red-800 shadow-md shadow-red-300/20 backdrop-blur-sm transition-opacity md:text-xl`}
           >
             No Options
           </div>
