@@ -21,12 +21,12 @@ export default function GameBoard({
   handleswitchTurnTimer,
 }) {
   //UI
-  const [socketRef, setSocketRef] = useState();
   const [selectedField, setSelectedField] = useState();
   const [showOptions, setShowOptions] = useState();
   const [noOptions, setNoOptions] = useState(false);
 
   //Logic
+  const [socketRef, setSocketRef] = useState();
   const [allMoveOptions, setAllMoveOptions] = useState(null);
   const [isEndgame, setIsEndGame] = useState(false);
 
@@ -56,6 +56,8 @@ export default function GameBoard({
     }
     setStepControl((prev) => ({ ...prev, [key]: value }));
   }
+
+  /** USE-EFFECTS */
 
   // handling dis-select field
   useEffect(() => {
@@ -97,21 +99,20 @@ export default function GameBoard({
     socketRef.addEventListener("message", handleMessage);
   }, [socketRef]);
 
+  /** USE-EFFECTS for GAME-STEPS */
+
   // initial setting of DICE RESULTS COPY and stepControl
-  // UP TO DATE NEEDED: gameState.diceResults
   useEffect(() => {
     console.log("STEP 0");
     if (!yourTurn) return;
-    if (yourTurn && !gameState.diceResults.includes("?")) {
+    if (!gameState.diceResults.includes("?")) {
       console.log("STEP 0 EXECUTE");
       handleDiceResultsCopy(gameState.diceResults);
-      // changeStepControl("diceResultsCopyUpdated", true);
       changeStepControl("boardUpdated", true);
     }
   }, [gameState.diceResults, yourTurn]);
 
   // setting ISENDGAME
-  // UP TO DATE NEEDED: gameState.board
   useEffect(() => {
     console.log("STEP 1");
     if (stepControl.boardUpdated) {
@@ -144,90 +145,70 @@ export default function GameBoard({
   }, [stepControl.boardUpdated]);
 
   // calculate OPTIONS
-  // UP TO DATE NEEDED: gameState.board && isEndgame && diceResultsCopy
   useEffect(() => {
     console.log("STEP 2");
     if (stepControl.endGameUpdated) {
-      if (!yourTurn) {
-        setAllMoveOptions(null);
-      } else if (
-        yourTurn &&
-        gameState &&
-        !gameState.diceResults.includes("?")
-      ) {
-        console.log("STEP 2 EXECUTE");
-        const fieldsInUse = Object.keys(gameState.board).filter((field) => {
-          return gameState.board[field].some(
-            ({ color }) => color === gameState.yourColor,
-          );
-        });
+      console.log("STEP 2 EXECUTE");
 
-        const prisonId = gameState.yourColor === "black" ? 0 : 25;
+      const fieldsInUse = Object.keys(gameState.board).filter((field) => {
+        return gameState.board[field].some(
+          ({ color }) => color === gameState.yourColor,
+        );
+      });
 
-        const stonesInPrison = gameState.board[prisonId].length !== 0;
+      const prisonId = gameState.yourColor === "black" ? 0 : 25;
+      const stonesInPrison = gameState.board[prisonId].length !== 0;
+      const fieldsToCalculate = stonesInPrison ? [prisonId] : fieldsInUse;
 
-        const fieldsToCalculate = stonesInPrison ? [prisonId] : fieldsInUse;
+      const calculatedOptions = fieldsToCalculate
+        .map((field) => {
+          const calculatedOptions = calculateMoveOptions(Number(field));
 
-        const calculatedOptions = fieldsToCalculate
-          .map((field) => {
-            const calculatedOptions = calculateMoveOptions(Number(field));
+          const { singleDiceOptions, combinedOptions } = calculatedOptions;
 
-            const { singleDiceOptions, combinedOptions } = calculatedOptions;
+          if (singleDiceOptions.length === 0 && combinedOptions.length === 0) {
+            return null;
+          } else {
+            return {
+              fieldId: Number(field),
+              singleDiceOptions,
+              combinedOptions,
+            };
+          }
+        })
+        .filter((item) => item !== null);
 
-            if (
-              singleDiceOptions.length === 0 &&
-              combinedOptions.length === 0
-            ) {
-              return null;
-            } else {
-              return {
-                fieldId: Number(field),
-                singleDiceOptions,
-                combinedOptions,
-              };
-            }
-          })
-          .filter((item) => item !== null);
+      const resultsObject = calculatedOptions.reduce((acc, item) => {
+        acc[item.fieldId] = {
+          singleDiceOptions: item?.singleDiceOptions || [],
+          combinedOptions: item?.combinedOptions || [],
+        };
+        return acc;
+      }, {});
 
-        const resultsObject = calculatedOptions.reduce((acc, item) => {
-          acc[item.fieldId] = {
-            singleDiceOptions: item?.singleDiceOptions || [],
-            combinedOptions: item?.combinedOptions || [],
-          };
-          return acc;
-        }, {});
-
-        setAllMoveOptions(resultsObject);
-        changeStepControl("endGameUpdated", false);
-        changeStepControl("moveOptionsUpdated", true);
-
-        console.log("RESULTS OBJECT:", resultsObject);
-      }
+      setAllMoveOptions(resultsObject);
+      changeStepControl("endGameUpdated", false);
+      changeStepControl("moveOptionsUpdated", true);
     }
   }, [stepControl.endGameUpdated]);
 
   // passing TURN
   useEffect(() => {
     console.log("STEP 3");
+    if (!yourTurn) return;
+
     if (stepControl.moveOptionsUpdated && allMoveOptions) {
       console.log("STEP 3 EXECUTE");
       const noOptions = Object.values(allMoveOptions).every(
         (value) => value.singleDiceOptions.length === 0,
       );
 
-      if (yourTurn && diceComplete && noOptions) {
-        const cancelAfterFirstDice = diceResultsCopy.length > 1;
+      if (diceComplete && noOptions) {
+        const cancelAfterFirstDice = diceResultsCopy.length >= 1;
         const time = cancelAfterFirstDice ? 6000 : 2000;
         cancelAfterFirstDice && setNoOptions(true);
-        handleswitchTurnTimer(time);
-        setTimeout(() => {
-          socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
-          handleDiceComplete(false);
-          setAllMoveOptions(null);
-          setNoOptions(false);
-        }, time);
+        passTurn(time);
       }
-      changeStepControl("reset");
     }
   }, [stepControl.moveOptionsUpdated, allMoveOptions]);
 
@@ -243,23 +224,34 @@ export default function GameBoard({
           ? index >= 1 && index < 7
           : index > 18 && index <= 24;
       })
-      .every((item) => item.length > 1 && item.color !== gameState.yourColor);
+      .every(
+        (item) =>
+          item.length > 1 &&
+          !item.map(({ color }) => color).includes(gameState.yourColor),
+      );
 
-    let timeOut;
-    if (yourTurn && stonesInPrison && startingFieldOccupied) {
+    if (stonesInPrison && startingFieldOccupied) {
       setNoOptions(true);
       handleDisableButton(true);
-      handleswitchTurnTimer(3000);
-      timeOut = setTimeout(() => {
-        socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
-        handleDiceComplete(false);
-        setAllMoveOptions(null);
-        setNoOptions(false);
-      }, 3000);
-      changeStepControl("reset");
+      passTurn(4000);
     }
-    return () => clearTimeout(timeOut);
   }, [yourTurn]);
+
+  /** FUNCTIONS */
+
+  // HELPER passing turn; sending message; setting states
+  function passTurn(timer) {
+    handleswitchTurnTimer(timer);
+
+    setTimeout(() => {
+      socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
+      handleDiceComplete(false);
+      setAllMoveOptions(null);
+      setNoOptions(false);
+    }, timer);
+
+    changeStepControl("reset");
+  }
 
   // handling MOVING STONES onClick
   // UPDATES diceResultsCopy && gameState.board && sends message to WS
@@ -333,7 +325,7 @@ export default function GameBoard({
     }
   }
 
-  // HELPER for calculating MOVE OPTIONS
+  // HELPER for calculating available MOVE OPTIONS
   function calculateMoveOptions(fieldId) {
     const { board, yourColor } = gameState;
     const direction = yourColor === "black" ? 1 : -1;
