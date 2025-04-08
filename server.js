@@ -151,6 +151,12 @@ wss.on("connection", (ws) => {
       const exists = Object.keys(rooms).includes(roomId);
       ws.send(JSON.stringify({ type: "room-exists", exists, roomId }));
     }
+
+    if (data.type === "send-timer") {
+      const roomId = data.roomId;
+      const timer = data.timer;
+      broadCastToRoom(roomId, { type: "receive-timer", timer });
+    }
   });
 
   ws.on("close", () => {

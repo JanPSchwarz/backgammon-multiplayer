@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import GameBoard from "../components/GameBoard";
-import DiceControls from "../components/DiceControls";
+import Controls from "../components/Controls";
 import { usePathname } from "next/navigation";
 import { intialGameState } from "../utils/gameState";
 import Spinner from "@/public/board/infinite-spinner.svg";
@@ -19,12 +19,12 @@ export default function Home() {
   const [diceResultsCopy, setDiceResultsCopy] = useState([]);
   const [yourTurn, setYourTurn] = useState();
 
-  console.log("DISONNECT:", oponentDisconnect);
-
   // UI
   const [disableButton, setDisableButton] = useState(false);
   const [boardLoaded, setBoardLoaded] = useState(false);
+  const [switchTurnTimer, setSwitchTurnTimer] = useState(false);
 
+  console.log("SWITCH TURN TIMER:", switchTurnTimer);
   // PWA navigation
   const [isPWA, setIsPWA] = useState(false);
 
@@ -84,6 +84,11 @@ export default function Home() {
       if (message.type === "error") {
         console.log("error:", message.message);
       }
+
+      if (message.type === "receive-timer") {
+        const timer = message.timer;
+        setSwitchTurnTimer(timer);
+      }
     };
 
     ws.onclose = () => {
@@ -96,6 +101,28 @@ export default function Home() {
       ws.close();
     };
   }, []);
+
+  // detect PWA
+  useEffect(() => {
+    if (window.matchMedia(`(display-mode: standalone)`).matches) {
+      setIsPWA(true);
+    }
+  }, []);
+
+  // adding PROMPT before LEAVING page
+  // useEffect(() => {
+  //   function beforeUnload(event) {
+  //     event.preventDefault();
+
+  //     event.returnValue = true;
+  //   }
+
+  //   window.addEventListener("beforeunload", beforeUnload);
+
+  //   return () => {
+  //     window.removeEventListener("beforeunload", beforeUnload);
+  //   };
+  // }, []);
 
   // UI updates
   useEffect(() => {
@@ -121,27 +148,16 @@ export default function Home() {
     return () => clearTimeout(timeOut);
   }, [statusText]);
 
-  // detect PWA
   useEffect(() => {
-    if (window.matchMedia(`(display-mode: standalone)`).matches) {
-      setIsPWA(true);
+    let timeOut;
+    if (switchTurnTimer) {
+      timeOut = setTimeout(() => {
+        setSwitchTurnTimer();
+      }, switchTurnTimer);
     }
-  }, []);
 
-  // adding PROMPT before LEAVING page
-  // useEffect(() => {
-  //   function beforeUnload(event) {
-  //     event.preventDefault();
-
-  //     event.returnValue = true;
-  //   }
-
-  //   window.addEventListener("beforeunload", beforeUnload);
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", beforeUnload);
-  //   };
-  // }, []);
+    return () => clearTimeout(timeOut);
+  }, [switchTurnTimer]);
 
   // logging
   Object.entries(gameState).map(([key, value]) => {
@@ -173,6 +189,12 @@ export default function Home() {
     setBoardLoaded(value);
   }
 
+  function handleswitchTurnTimer(value) {
+    socketRef.current.send(
+      JSON.stringify({ type: "send-timer", roomId, timer: value }),
+    );
+  }
+
   return (
     <>
       <div
@@ -182,7 +204,7 @@ export default function Home() {
         <p>Loading Game...</p>
       </div>
       <div
-        className={`absolute top-0 z-20 ${boardLoaded ? `opacity-1` : `opacity-0`} ${statusText ? `translate-y-0` : `translate-y-[-100%] duration-0`} rounded-b-md transition-all ${oponentDisconnect ? `border-red-400 bg-red-200/90 text-red-800` : `border-blue-400 bg-blue-50/80 text-blue-800`} border-t-0 border p-4 font-semibold md:text-lg`}
+        className={`absolute top-0 z-20 ${boardLoaded ? `opacity-1` : `opacity-0`} ${statusText ? `translate-y-0` : `translate-y-[-100%] duration-0`} rounded-b-md transition-all ${oponentDisconnect ? `border-red-400 bg-red-200/90 text-red-800` : `border-blue-400 bg-blue-50/80 text-blue-800`} border border-t-0 p-4 font-semibold md:text-lg`}
       >
         <p className={``}>{statusText}</p>
       </div>
@@ -201,8 +223,9 @@ export default function Home() {
           handleDiceResultsCopy={handleDiceResultsCopy}
           handleGameBoardUI={handleGameBoardUI}
           handleDisableButton={handleDisableButton}
+          handleswitchTurnTimer={handleswitchTurnTimer}
         />
-        <DiceControls
+        <Controls
           socket={socketRef}
           disableButton={disableButton}
           roomId={roomId}
@@ -210,6 +233,8 @@ export default function Home() {
           yourTurn={yourTurn}
           diceResultsCopy={diceResultsCopy}
           isPWA={isPWA}
+          oponentDisconnect={oponentDisconnect}
+          switchTurnTimer={switchTurnTimer}
           handleDiceComplete={handleDiceComplete}
           handleGameState={handleGameState}
           handleDisableButton={handleDisableButton}

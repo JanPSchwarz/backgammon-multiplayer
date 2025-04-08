@@ -18,6 +18,7 @@ export default function GameBoard({
   diceComplete,
   handleGameBoardUI,
   handleDisableButton,
+  handleswitchTurnTimer,
 }) {
   //UI
   const [socketRef, setSocketRef] = useState();
@@ -218,6 +219,7 @@ export default function GameBoard({
         const cancelAfterFirstDice = diceResultsCopy.length > 1;
         const time = cancelAfterFirstDice ? 6000 : 2000;
         cancelAfterFirstDice && setNoOptions(true);
+        handleswitchTurnTimer(time);
         setTimeout(() => {
           socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
           handleDiceComplete(false);
@@ -247,6 +249,7 @@ export default function GameBoard({
     if (yourTurn && stonesInPrison && startingFieldOccupied) {
       setNoOptions(true);
       handleDisableButton(true);
+      handleswitchTurnTimer(3000);
       timeOut = setTimeout(() => {
         socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
         handleDiceComplete(false);
