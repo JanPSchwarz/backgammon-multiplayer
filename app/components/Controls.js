@@ -1,13 +1,9 @@
 "use client";
 
-// import DiceBox from "@3d-dice/dice-box";
 import DiceBox from "@3d-dice/dice-box-threejs";
 import { useEffect, useState } from "react";
-import HomeIcon from "@/public/home.svg";
-import LeavePrompt from "../components/LeavePrompt";
-import DiceIcon from "@/public/dice.svg";
-import ShareIcon from "@/public/share.svg";
-import SharePrompt from "./SharePrompt";
+import DiceControlsPanel from "./DiceControlsPanel";
+import SideButtonPanel from "./SideButtonPanel";
 
 export default function DiceControls({
   socket,
@@ -20,27 +16,25 @@ export default function DiceControls({
   diceResultsCopy,
   disableButton,
   handleDisableButton,
+  oponentDisconnect,
+  switchTurnTimer,
 }) {
   const [Dice, setDice] = useState(null);
 
-  //UI
-  const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
+  const [diceColor, setDiceColor] = useState(undefined);
 
   // define and set DICE
   useEffect(() => {
     const dpr = window.devicePixelRatio;
     const diceScale = Math.min(
-      Math.max(Math.round(0.06 * window.innerWidth), 40),
+      Math.max(Math.round(0.06 * window.innerWidth), 50),
       85,
     );
-
-    console.log("DPR:", dpr);
 
     if (typeof window !== "undefined" && !Dice) {
       const DiceBoxInstance = new DiceBox("#app", {
         light_intensity: 1.5,
-        gravity_multiplier: 400,
+        gravity_multiplier: 200,
         strength: 1.5,
         baseScale: diceScale,
         assetPath: "/",
@@ -62,7 +56,7 @@ export default function DiceControls({
     const canvas = document.querySelector(`#app canvas`);
 
     if (canvas) {
-      canvas.style.position = "fixed";
+      canvas.style.position = "absolute";
       canvas.style.padding = "10px";
       canvas.style.zIndex = "100";
       canvas.style.pointerEvents = "none";
@@ -90,7 +84,7 @@ export default function DiceControls({
             document.documentElement.clientHeight;
 
           const newDiceScale = Math.min(
-            Math.max(Math.round(0.06 * window.innerWidth), 40),
+            Math.max(Math.round(0.06 * window.innerWidth), 50),
             85,
           );
 
@@ -149,6 +143,17 @@ export default function DiceControls({
     }
   }, [Dice]);
 
+  // UI useEffects
+
+  useEffect(() => {
+    if (!diceColor) {
+      const randomColor = pickRandomColor();
+      setDiceColor(randomColor);
+    }
+  }, [diceColor]);
+
+  console.log("DICE COLOR:", diceColor);
+
   // handle socket MESSAGES
   useEffect(() => {
     if (!socket.current) return;
@@ -159,8 +164,11 @@ export default function DiceControls({
         handleGameState("diceResults", ["?", "?"]);
         const { determinedNumbers, theme_colorset } = message.diceConfig;
 
-        Dice.updateConfig({ theme_colorset });
-        Dice.roll(`2dpip@${determinedNumbers}`);
+        console.log("THEME LOG:", message.diceConfig);
+
+        Dice.updateConfig({ theme_colorset }).then(() => {
+          Dice.roll(`2dpip@${determinedNumbers}`);
+        });
       }
     }
 
@@ -168,7 +176,17 @@ export default function DiceControls({
   }, [socket.current]);
 
   function pickRandomColor() {
-    const themes = ["white", "black", "rainbow", "bronze", "necrotic"];
+    const themes = [
+      "white",
+      "black",
+      "rainbow",
+      "bronze",
+      "necrotic",
+      "fire",
+      "ice",
+      "water",
+      "earth",
+    ];
     const random = Math.floor(Math.random() * themes.length);
 
     return themes[random];
@@ -182,7 +200,8 @@ export default function DiceControls({
     const randomResult1 = Math.floor(Math.random() * 5) + 1;
     const randomResult2 = Math.floor(Math.random() * 5) + 1;
     const determinedNumbers = `${randomResult1}, ${randomResult2}`;
-    const theme_colorset = pickRandomColor();
+    const theme_colorset = diceColor;
+    console.log("THEME:", theme_colorset);
 
     const diceConfig = { determinedNumbers, theme_colorset };
 
@@ -199,14 +218,6 @@ export default function DiceControls({
     }
   }
 
-  function handleLeaveModal() {
-    setShowLeaveModal(!showLeaveModal);
-  }
-
-  function handleShareModal() {
-    setShowShareModal(!showShareModal);
-  }
-
   // UI mapping
   const diceCount = diceResultsCopy.reduce((acc, num) => {
     acc[num] = (acc[num] || 0) + 1;
@@ -219,67 +230,22 @@ export default function DiceControls({
 
     return { result, used: isUsed };
   });
+
   return (
     <>
-      <div
-        className={`relative flex max-h-min w-full flex-1 flex-col items-center justify-center portrait:mb-6 portrait:w-[30%] portrait:max-w-[250px] landscape:mr-4 landscape:w-[15%] landscape:max-w-[120px] landscape:md:max-w-[150px]`}
-      >
-        <p className={`text-center`}>{yourTurn ? "Your" : "Not Your"} turn!</p>
-        <button
-          className={`my-6 w-full rounded bg-blue-400 p-3 px-6 text-sm font-semibold shadow-md shadow-blue-500/50 transition-all active:scale-90 disabled:bg-zinc-300 disabled:shadow-zinc-500/50 md:p-4 md:px-8`}
-          disabled={disableButton}
-          onClick={rollDice}
-        >
-          Roll dice
-        </button>
-        <div
-          className={`m-1 grid w-full grid-cols-2 grid-rows-2 place-items-center gap-2`}
-        >
-          {diceUI.map(({ result, used }, index) => {
-            return (
-              <p
-                key={index}
-                className={`h-full w-full rounded-md border border-none py-4 text-center transition-all duration-300 ${result ? `opacity-1` : `opacity-0`} ${!yourTurn || result === "?" ? `bg-gray-200 shadow-gray-500/50` : used ? `bg-rose-300 shadow-rose-500/50` : `bg-blue-300 shadow-blue-500/50`} text-lg font-semibold shadow-md md:text-2xl`}
-              >
-                {result || 0}
-              </p>
-            );
-          })}
-        </div>
-      </div>
-      <div
-        className={`absolute right-0 z-10 flex h-full mr-1 flex-col items-center justify-between py-2`}
-      >
-        <button
-          onClick={clearDice}
-          className={`relative flex aspect-square max-w-min items-center justify-center rounded-full border border-black/50 bg-gray-300`}
-        >
-          <DiceIcon className={`m-2 size-6 fill-red-400`} />
-          <div
-            className={`absolute right-1/2 top-1/2 h-0.5 w-4/5 translate-x-1/2 rotate-45 bg-red-400`}
-          ></div>
-        </button>
-        <div className={`flex flex-col items-center gap-1`}>
-          <button
-            onClick={handleShareModal}
-            className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
-          >
-            <ShareIcon className={`m-1 size-8 fill-slate-100/90`} />
-          </button>
-          <div className={`flex flex-col items-center gap-1`}>
-            <button
-              onClick={handleLeaveModal}
-              className={`flex aspect-square max-w-min items-center justify-center rounded-full bg-blue-500/100`}
-            >
-              <HomeIcon className={`m-0.5 size-9 fill-slate-100/90`} />
-            </button>
-          </div>
-        </div>
-      </div>
-      {showLeaveModal && <LeavePrompt closeModal={handleLeaveModal} />}
-      {showShareModal && (
-        <SharePrompt closeModal={handleShareModal} roomId={roomId} />
-      )}
+      <DiceControlsPanel
+        diceResultsCopy={diceResultsCopy}
+        gameState={gameState}
+        yourTurn={yourTurn}
+        disableButton={disableButton}
+        rollDice={rollDice}
+      />
+      <SideButtonPanel
+        clearDice={clearDice}
+        oponentDisconnect={oponentDisconnect}
+        roomId
+        switchTurnTimer={switchTurnTimer}
+      />
     </>
   );
 }

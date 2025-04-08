@@ -11,6 +11,10 @@ module.exports = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      animation: {
+        neumorphIn: `neumorph-in 300ms ease-in-out forwards`,
+        neumorphOut: `neumorph-out 300ms ease-in-out forwards`,
+      },
     },
   },
   plugins: [],

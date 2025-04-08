@@ -60,7 +60,7 @@ export default function PWAManual({ handleShowManual }) {
               How to install Backgammon on your Device!
             </h1>
             <p className={`text-sm italic`}>
-              On non-Chromium browsers, you have to install manually...
+              On some browsers, you have to install manually...
               {isFireFox && (
                 <span className={`block`}>
                   For Firefox you need a extra extension for this feature!

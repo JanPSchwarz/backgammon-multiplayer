@@ -16,15 +16,15 @@ const board = [
   [
     {
       fields: [13, 14, 15, 16, 17, 18],
-      areaStyles: `w-[91%] translate-x-[-0.5%]`,
-      fieldStyles: ` place-content-end`,
+      areaStyles: `w-[85%] translate-x-[-1%]`,
+      fieldStyles: `place-content-end`,
       stoneStyles: `bottom-0`,
     },
     {
       fields: [19, 20, 21, 22, 23, 24],
-      areaStyles: `w-[90%] translate-x-[-2%]`,
-      fieldStyles: ` place-content-end`,
-      stoneStyles: `bottom-0 translate-x-[-5%]`,
+      areaStyles: `w-[87%] translate-x-[-2%]`,
+      fieldStyles: `place-content-end`,
+      stoneStyles: `bottom-0 translate-x-[0%]`,
     },
   ],
 ];

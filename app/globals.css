@@ -10,8 +10,58 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+button:hover {
+  cursor: pointer;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  @keyframes neumorph-in {
+    from {
+      box-shadow:
+        5px 5px 10px #828282,
+        -5px -5px 10px #ffffff;
+    }
+    33% {
+      box-shadow:
+        2px 2px 7px #9b9b9b,
+        -2px -2px 7px #ffffff;
+    }
+    66% {
+      box-shadow:
+        0px 0px 5px #9b9b9b,
+        -0px -0px 5px #ffffff;
+    }
+    to {
+      box-shadow:
+        inset 3px 3px 7px #828282,
+        inset -3px -3px 7px #ffffff;
+    }
+  }
+
+  @keyframes neumorph-out {
+    from {
+      box-shadow:
+        inset 3px 3px 7px #828282,
+        inset -3px -3px 7px #ffffff;
+    }
+    33% {
+      box-shadow:
+        0px 0px 5px #9b9b9b,
+        -0px -0px 5px #ffffff;
+    }
+    66% {
+      box-shadow:
+        2px 2px 7px #9b9b9b,
+        -2px -2px 7px #ffffff;
+    }
+    to {
+      box-shadow:
+        5px 5px 10px #828282,
+        -5px -5px 10px #ffffff;
+    }
   }
 }

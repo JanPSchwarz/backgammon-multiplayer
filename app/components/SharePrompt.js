@@ -76,26 +76,24 @@ export default function SharePrompt({ closeModal, roomId }) {
     <>
       <Modal onClose={closeModal}>
         <div className={`flex flex-col gap-4 p-6`}>
-          <div className={`flex gap-4`}>
-            <button
-              onClick={shareId}
-              className={`flex aspect-square w-10 items-center justify-center rounded-full bg-blue-500 text-center font-semibold text-white`}
+          <button onClick={shareId} className={`group flex gap-4`}>
+            <div
+              className={`flex aspect-square w-10 items-center justify-center rounded-full bg-blue-500 text-center font-semibold text-white group-active:scale-90`}
             >
               {idCopied ? <CopyIcon className={`size-5 fill-white`} /> : "ID"}
-            </button>
+            </div>
             <p className={`flex items-center justify-center`}>Share RoomID</p>
-          </div>
-          <div className={`flex gap-4`}>
-            <button
-              onClick={shareUrl}
-              className={`flex aspect-square w-10 items-center justify-center rounded-full bg-blue-500 text-center font-semibold text-white`}
+          </button>
+          <button onClick={shareUrl} className={`flex group gap-4`}>
+            <div
+              className={`flex aspect-square w-10 items-center justify-center rounded-full bg-blue-500 text-center font-semibold text-white group-active:scale-90`}
             >
               {urlCopied ? <CopyIcon className={`size-5 fill-white`} /> : "URL"}
-            </button>
+            </div>
             <p className={`flex items-center justify-center`}>
               Share complete URL
             </p>
-          </div>
+          </button>
         </div>
       </Modal>
     </>

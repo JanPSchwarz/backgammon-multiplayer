@@ -18,6 +18,7 @@ export default function GameBoard({
   diceComplete,
   handleGameBoardUI,
   handleDisableButton,
+  handleswitchTurnTimer,
 }) {
   //UI
   const [socketRef, setSocketRef] = useState();
@@ -218,6 +219,7 @@ export default function GameBoard({
         const cancelAfterFirstDice = diceResultsCopy.length > 1;
         const time = cancelAfterFirstDice ? 6000 : 2000;
         cancelAfterFirstDice && setNoOptions(true);
+        handleswitchTurnTimer(time);
         setTimeout(() => {
           socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
           handleDiceComplete(false);
@@ -247,6 +249,7 @@ export default function GameBoard({
     if (yourTurn && stonesInPrison && startingFieldOccupied) {
       setNoOptions(true);
       handleDisableButton(true);
+      handleswitchTurnTimer(3000);
       timeOut = setTimeout(() => {
         socketRef.send(JSON.stringify({ type: "switch-turn", roomId }));
         handleDiceComplete(false);
@@ -491,7 +494,7 @@ export default function GameBoard({
             onLoad={handleUILoading}
           />
           <div
-            className={`absolute ${noOptions ? `opacity-1` : `opacity-0`} pointer-events-none right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 bg-red-500/20 px-[3vw] py-[1vh] text-sm font-semibold shadow-md shadow-red-300/20 backdrop-blur-sm transition-opacity md:text-xl`}
+            className={`absolute ${noOptions ? `opacity-1` : `opacity-0`} pointer-events-none right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 border border-red-400 bg-red-200/70 px-[3vw] py-[1vh] text-sm font-semibold text-red-800 shadow-md shadow-red-300/20 backdrop-blur-sm transition-opacity md:text-xl`}
           >
             No Options
           </div>
