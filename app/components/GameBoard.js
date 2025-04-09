@@ -1,15 +1,9 @@
-import BoardImage from "@/public/board/board.webp";
-import WhiteStone from "@/public/board/whitestone.webp";
-import BlackStone from "@/public/board/blackstone.webp";
-import { board } from "../utils/board";
-import { twMerge } from "tailwind-merge";
 import { useEffect, useState } from "react";
-import Image from "next/image";
-
 import MainBoard from "./MainBoard";
 import EndFields from "./EndFields";
 import Prison from "./Prison";
 import BoardBackground from "./BoardBackground";
+import PlayersUI from "./PlayersUI";
 
 export default function GameBoard({
   socket,
@@ -476,6 +470,7 @@ export default function GameBoard({
             isEndgame={isEndgame}
             showOptions={showOptions}
           />
+          <PlayersUI />
         </div>
       </div>
     </>

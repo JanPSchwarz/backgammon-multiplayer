@@ -18,6 +18,7 @@ export default function DiceControls({
   handleDisableButton,
   oponentDisconnect,
   switchTurnTimer,
+  readyToStart,
 }) {
   const [Dice, setDice] = useState(null);
 
@@ -245,6 +246,7 @@ export default function DiceControls({
         oponentDisconnect={oponentDisconnect}
         roomId
         switchTurnTimer={switchTurnTimer}
+        readyToStart={readyToStart}
       />
     </>
   );

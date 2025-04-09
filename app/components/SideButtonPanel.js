@@ -15,6 +15,7 @@ export default function SideButtonPanel({
   oponentDisconnect,
   roomId,
   switchTurnTimer,
+  readyToStart,
 }) {
   const [showModals, setShowModals] = useState({
     leaveModal: false,
@@ -90,7 +91,10 @@ export default function SideButtonPanel({
           </button>
           <button
             onClick={() => handleShowModal("shareModal")}
-            className={twMerge(sharedWrapperClassNames, ``)}
+            className={twMerge(
+              sharedWrapperClassNames,
+              `${!readyToStart && `animate-bounce`}`,
+            )}
           >
             <ShareIcon className={twMerge(sharedIconClassNames, ``)} />
           </button>
