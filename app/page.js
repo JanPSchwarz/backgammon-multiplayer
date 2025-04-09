@@ -149,7 +149,7 @@ export default function Room() {
           )}
           {pwaNOTinstalled && (
             <button
-              className={`absolute top-0 right-0 m-6 rounded-md bg-green-400/80 p-2 text-xs font-semibold shadow-md shadow-green-800/30 md:p-4 md:py-3 md:text-base`}
+              className={`absolute right-0 top-0 m-6 rounded-md bg-green-400/80 p-2 text-xs font-semibold shadow-md shadow-green-800/30 md:p-4 md:py-3 md:text-base`}
               onClick={installPWA}
             >
               Install App!
@@ -198,7 +198,7 @@ export default function Room() {
               </button>
               {noRoom && (
                 <p
-                  className={`absolute w-full rounded-md bg-red-400/50 p-1 portrait:translate-y-[200%] landscape:translate-x-[110%] landscape:lg:translate-x-0 landscape:lg:translate-y-[200%]`}
+                  className={`absolute w-full rounded-md border border-red-800 bg-red-400/50 p-1 text-red-800 portrait:translate-y-[200%] landscape:translate-x-[110%] landscape:lg:translate-x-0 landscape:lg:translate-y-[200%]`}
                 >
                   Room doesn&apos;t exist...
                 </p>

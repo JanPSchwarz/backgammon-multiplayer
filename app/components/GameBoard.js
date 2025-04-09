@@ -6,6 +6,11 @@ import { twMerge } from "tailwind-merge";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+import MainBoard from "./MainBoard";
+import EndFields from "./EndFields";
+import Prison from "./Prison";
+import BoardBackground from "./BoardBackground";
+
 export default function GameBoard({
   socket,
   gameState,
@@ -448,180 +453,29 @@ export default function GameBoard({
     }, randomTime);
   }
 
-  // UI mapping
-  const throwOutArea = [
-    {
-      key: "whiteOut",
-      color: "white",
-    },
-    {
-      key: "blackOut",
-      color: "black",
-    },
-  ];
-
-  function getStones(key) {
-    return gameState.board[key].length;
-  }
-
-  // UI mapping
-  const prison = [
-    { id: "0", color: "black", number: getStones("0") },
-    { id: "25", color: "white", number: getStones("25") },
-  ];
-
   return (
     <>
       <div
         className={`flex h-full w-full max-w-max flex-1 select-none items-center justify-center`}
       >
         <div className={`relative max-h-max`}>
-          <Image
-            src={BoardImage}
-            alt="Backgammon board"
-            quality={50}
-            loading="eager"
-            priority
-            className={`h-auto max-h-dvh w-auto`}
-            onLoad={handleUILoading}
+          <BoardBackground
+            handleUILoading={handleUILoading}
+            noOptions={noOptions}
           />
-          <div
-            className={`absolute ${noOptions ? `opacity-1` : `opacity-0`} pointer-events-none right-1/2 top-1/2 z-30 -translate-y-1/2 translate-x-1/2 border border-red-400 bg-red-200/70 px-[3vw] py-[1vh] text-sm font-semibold text-red-800 shadow-md shadow-red-300/20 backdrop-blur-sm transition-opacity md:text-xl`}
-          >
-            No Options
-          </div>
-
-          <div
-            className={`absolute right-1/2 top-1/2 z-20 h-[14%] w-[5%] -translate-y-1/2 translate-x-[38%]`}
-          >
-            {prison
-              .filter(({ number }) => number !== 0)
-              .map(({ color, number, id }, index) => {
-                return (
-                  <div
-                    id={id}
-                    key={id}
-                    onClick={() => onClickHandler(id)}
-                    className={`field relative ${id === selectedField ? `bg-red-500/30 shadow-2xl shadow-red-500/30 ring ring-red-500/30` : ``}`}
-                  >
-                    <Image
-                      key={index}
-                      alt="stone"
-                      src={color === "black" ? BlackStone : WhiteStone}
-                      className={``}
-                    />
-                    <p
-                      className={`absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 text-xs md:text-base ${color === "black" ? `text-white` : `text-black`}`}
-                    >
-                      {number}
-                    </p>
-                  </div>
-                );
-              })}
-          </div>
-
-          <div
-            className={`absolute right-[2.5%] top-1/2 z-10 flex h-[80%] w-[5%] -translate-y-1/2 flex-col gap-[3%]`}
-          >
-            {throwOutArea.map(({ key, color }) => {
-              const hasContent = gameState.board[key].length !== 0;
-              return (
-                <div
-                  key={key}
-                  id={key}
-                  onClick={() => {
-                    onClickHandler(key);
-                  }}
-                  className={`flex h-full flex-col items-center gap-[1.5%] rounded-md ${color === "black" ? `bg-gradient-to-b` : `bg-gradient-to-t`} from-zinc-300 to-orange-200 ${hasContent || isEndgame ? `opacity-1` : `opacity-0`} ${color === "black" ? `justify-end` : `justify-start`} py-[5%] shadow-lg transition-opacity duration-500 ${showOptions?.singleDiceOptions?.includes(key) ? `ring-2 ring-green-400 ring-offset-2 md:ring-4` : ``}`}
-                >
-                  {gameState.board[key].map((item, index) => {
-                    return (
-                      <div
-                        key={index}
-                        className={`${color === "black" ? "bg-black" : "bg-white"} h-[5%] w-[90%] rounded-md`}
-                      />
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-          <div
-            className={`absolute right-1/2 top-1/2 z-10 flex h-[77%] w-[70%] translate-x-[49.5%] translate-y-[-50.5%] flex-col gap-[3%]`}
-          >
-            {board.map((area, index) => {
-              return (
-                <div key={index} className={`flex w-full flex-1 gap-[5%]`}>
-                  {area.map(
-                    (
-                      { fields, areaStyles, fieldStyles, stoneStyles },
-                      index,
-                    ) => {
-                      return (
-                        <div
-                          key={index}
-                          className={
-                            twMerge(areaStyles, `grid h-full grid-cols-6`) +
-                            ` field`
-                          }
-                        >
-                          {fields.map((id) => {
-                            const isBottom = id > 12 && id < 25;
-                            return (
-                              <div
-                                key={id}
-                                id={id}
-                                onClick={() => {
-                                  onClickHandler(id);
-                                }}
-                                className={twMerge(
-                                  fieldStyles,
-                                  `relative grid grid-cols-1 ${isBottom ? `rounded-t-xl` : `rounded-b-xl`}`,
-                                  `${id === selectedField ? `bg-red-500/40 shadow-2xl shadow-red-500/50 ring-inset ring-red-500/30` : ``}`,
-                                  `${showOptions?.singleDiceOptions?.includes(id) ? `bg-blue-500/50 shadow-2xl shadow-blue-400/50 ring-inset ring-blue-400/50` : ``}`,
-                                  `${showOptions?.combinedOptions?.includes(id) ? `bg-orange-400/40 shadow-2xl shadow-orange-400/30 ring-inset ring-orange-400/30` : ``}`,
-                                )}
-                              >
-                                {gameState.board[id]?.map(
-                                  ({ id: field, color }, index) => {
-                                    const numberOfStones =
-                                      gameState.board[id].length;
-                                    const isBottom = id > 12 && id < 25;
-                                    const stack = numberOfStones > 5;
-                                    const direction = isBottom ? -1 : 1;
-                                    const spacing = 438 / numberOfStones;
-                                    const value = index * spacing * direction;
-                                    return (
-                                      <Image
-                                        key={field}
-                                        id={field}
-                                        src={
-                                          color === "black"
-                                            ? BlackStone
-                                            : WhiteStone
-                                        }
-                                        alt="Stone"
-                                        className={twMerge(stoneStyles, ``)}
-                                        style={{
-                                          position: stack && "absolute",
-                                          transform:
-                                            stack && `translateY(${value}%)`,
-                                        }}
-                                      />
-                                    );
-                                  },
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    },
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <MainBoard
+            gameState={gameState}
+            selectedField={selectedField}
+            showOptions={showOptions}
+            onClickHandler={onClickHandler}
+          />
+          <Prison gameState={gameState} />
+          <EndFields
+            gameState={gameState}
+            onClickHandler={onClickHandler}
+            isEndgame={isEndgame}
+            showOptions={showOptions}
+          />
         </div>
       </div>
     </>

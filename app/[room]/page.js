@@ -18,6 +18,7 @@ export default function Home() {
   const [diceComplete, setDiceComplete] = useState(false);
   const [diceResultsCopy, setDiceResultsCopy] = useState([]);
   const [yourTurn, setYourTurn] = useState();
+  const [readyToStart, setReadyToStart] = useState(false);
 
   // UI
   const [disableButton, setDisableButton] = useState(false);
@@ -58,6 +59,10 @@ export default function Home() {
         if (message.board !== null) {
           handleGameState("board", message.board);
         }
+
+        if (message.isFull) {
+          setReadyToStart(true);
+        }
       }
 
       if (message.type === "player-joined") {
@@ -66,6 +71,9 @@ export default function Home() {
         if (message.wasDisconnect) {
           setOpponentDisconnect(false);
           setStatusText("Opponent reconnected!");
+        }
+        if (message.isFull) {
+          setReadyToStart(true);
         }
       }
 
@@ -128,17 +136,14 @@ export default function Home() {
   useEffect(() => {
     const yourId = gameState.yourId;
 
-    console.log("TEST:", yourId);
-    console.log("TEST:", gameState.currentTurn);
-
-    if (yourId === gameState.currentTurn) {
+    if (yourId === gameState.currentTurn && readyToStart) {
       setYourTurn(true);
       setDisableButton(false);
     } else {
       setYourTurn(false);
       setDisableButton(true);
     }
-  }, [gameState.currentTurn]);
+  }, [gameState.currentTurn, readyToStart]);
 
   useEffect(() => {
     const timeOut = setTimeout(() => {
@@ -208,6 +213,16 @@ export default function Home() {
       >
         <p className={``}>{statusText}</p>
       </div>
+      {!readyToStart && (
+        <p
+          className={`absolute z-20 ${boardLoaded ? `opacity-1` : `opacity-0`} rounded-lg border-2 border-blue-600 bg-blue-400/90 p-2 text-center text-lg italic text-neutral-800 shadow-xl`}
+        >
+          Waiting for opponent...
+          <span className={`block not-italic`}>
+            Use share button to invite a friend!
+          </span>
+        </p>
+      )}
       <div
         className={`relative flex h-full w-full items-center justify-center gap-4 portrait:flex-col ${boardLoaded ? `opacity-1` : `opacity-0`} transition-opacity duration-500 landscape:flex-row`}
       >
@@ -235,6 +250,7 @@ export default function Home() {
           isPWA={isPWA}
           oponentDisconnect={oponentDisconnect}
           switchTurnTimer={switchTurnTimer}
+          readyToStart={readyToStart}
           handleDiceComplete={handleDiceComplete}
           handleGameState={handleGameState}
           handleDisableButton={handleDisableButton}

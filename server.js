@@ -92,6 +92,8 @@ wss.on("connection", (ws) => {
 
         thisRoom.colors.push({ client: senderId, color: yourColor });
 
+        const isFull = thisRoom.players.length === 2 ? true : false;
+
         ws.send(
           JSON.stringify({
             type: "room-joined",
@@ -100,11 +102,13 @@ wss.on("connection", (ws) => {
             turn: thisRoom.turn,
             color: yourColor,
             board: thisRoom?.board,
+            isFull,
           }),
         );
         broadCastToOtherPlayer(roomId, ws, {
           type: "player-joined",
           turn: thisRoom.turn,
+          isFull,
           wasDisconnect: thisRoom.wasDisconnect,
         });
         logRoom();
