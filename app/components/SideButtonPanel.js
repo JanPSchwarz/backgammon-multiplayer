@@ -79,14 +79,15 @@ export default function SideButtonPanel({
               <CirceTimer time={switchTurnTimer} />
             </div>
           )}
-          {oponentDisconnect && (
-            <button
-              onClick={() => handleShowModal("disconnectModal")}
-              className={twMerge(sharedWrapperClassNames, `bg-red-500/100`)}
-            >
-              <ExclamationIcon className={twMerge(sharedIconClassNames, ``)} />
-            </button>
-          )}
+          <button
+            onClick={() => handleShowModal("disconnectModal")}
+            className={twMerge(
+              sharedWrapperClassNames,
+              `bg-red-500/100 ${oponentDisconnect ? `opacity-1` : `opacity-0`}`,
+            )}
+          >
+            <ExclamationIcon className={twMerge(sharedIconClassNames, ``)} />
+          </button>
           <button
             onClick={() => handleShowModal("shareModal")}
             className={twMerge(sharedWrapperClassNames, ``)}

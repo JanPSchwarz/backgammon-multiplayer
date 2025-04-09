@@ -521,7 +521,7 @@ export default function GameBoard({
           </div>
 
           <div
-            className={`absolute right-[2.5%] top-1/2 flex h-[80%] w-[5%] -translate-y-1/2 flex-col gap-[3%]`}
+            className={`absolute right-[2.5%] top-1/2 z-10 flex h-[80%] w-[5%] -translate-y-1/2 flex-col gap-[3%]`}
           >
             {throwOutArea.map(({ key, color }) => {
               const hasContent = gameState.board[key].length !== 0;
