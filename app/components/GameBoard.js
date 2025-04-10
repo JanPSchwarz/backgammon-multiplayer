@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useLocalStorageState from "use-local-storage-state";
 import MainBoard from "./MainBoard";
 import EndFields from "./EndFields";
 import Prison from "./Prison";
@@ -13,6 +14,7 @@ export default function GameBoard({
   handleDiceComplete,
   handleDiceResultsCopy,
   diceResultsCopy,
+  opponentName,
   roomId,
   diceComplete,
   handleGameBoardUI,
@@ -470,7 +472,12 @@ export default function GameBoard({
             isEndgame={isEndgame}
             showOptions={showOptions}
           />
-          <PlayersUI />
+          <PlayersUI
+            yourColor={gameState.yourColor}
+            opponentName={opponentName}
+            webSocket={socketRef}
+            roomId={roomId}
+          />
         </div>
       </div>
     </>

@@ -24,6 +24,7 @@
     "sharp": "^0.33.5",
     "tailwind-merge": "^3.0.2",
     "uid": "^2.0.2",
+    "use-local-storage-state": "^19.5.0",
     "uuid": "^11.1.0",
     "ws": "^8.18.1"
   },

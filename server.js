@@ -36,6 +36,9 @@ wss.on("connection", (ws) => {
           board: null,
           colors: [],
           wasDisconnect: false,
+          player1Name: "",
+          player2Name: "",
+          names: {},
         };
         ws.send(JSON.stringify({ type: "room-created", roomId }));
         logRoom();
@@ -68,16 +71,16 @@ wss.on("connection", (ws) => {
         thisRoom.players.push(senderId);
         thisRoom.sockets[senderId] = ws;
 
+        const firstToJoin = thisRoom.players.length === 1 ? true : false;
         const otherPlayer = thisRoom.players.filter(
           (player) => player !== senderId,
         )[0];
 
-        thisRoom.turn =
-          thisRoom.players.length === 1
+        thisRoom.turn = firstToJoin
+          ? senderId
+          : thisRoom.turn === undefined
             ? senderId
-            : thisRoom.turn === undefined
-              ? senderId
-              : otherPlayer;
+            : otherPlayer;
 
         const alreadyGivenColor = thisRoom.colors
           .filter((item) => item?.client !== senderId)
@@ -153,6 +156,26 @@ wss.on("connection", (ws) => {
     if (data.type === "send-timer") {
       const timer = data.timer;
       broadCastToRoom(roomId, { type: "receive-timer", timer });
+    }
+
+    if (data.type === "send-name") {
+      const yourName = data.name;
+      thisRoom.names[senderId] = yourName;
+
+      const otherPlayerName = Object.entries(thisRoom.names)
+        .filter(([id, name]) => id !== senderId)
+        ?.map(([id, name]) => name)[0];
+
+      broadCastToOtherPlayer(roomId, ws, {
+        type: "receive-name",
+        opponentName: yourName,
+      });
+      ws.send(
+        JSON.stringify({
+          type: "receive-name",
+          opponentName: otherPlayerName,
+        }),
+      );
     }
   });
 

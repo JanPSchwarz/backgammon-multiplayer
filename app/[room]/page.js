@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import useLocalStorageState from "use-local-storage-state";
 import GameBoard from "../components/GameBoard";
 import Controls from "../components/Controls";
 import { usePathname } from "next/navigation";
@@ -24,6 +25,10 @@ export default function Home() {
   const [disableButton, setDisableButton] = useState(false);
   const [boardLoaded, setBoardLoaded] = useState(false);
   const [switchTurnTimer, setSwitchTurnTimer] = useState(false);
+  const [yourName, setYourName] = useLocalStorageState("yourName", {
+    defaultValue: "",
+  });
+  const [opponentName, setOpponentName] = useState("");
 
   console.log("SWITCH TURN TIMER:", switchTurnTimer);
   // PWA navigation
@@ -97,6 +102,12 @@ export default function Home() {
         const timer = message.timer;
         setSwitchTurnTimer(timer);
       }
+
+      if (message.type === "receive-name") {
+        console.log("RECEIVE NAME:", message.opponentName);
+        const opponentName = message.opponentName;
+        setOpponentName(opponentName);
+      }
     };
 
     ws.onclose = () => {
@@ -163,6 +174,16 @@ export default function Home() {
 
     return () => clearTimeout(timeOut);
   }, [switchTurnTimer]);
+
+  useEffect(() => {
+    console.log(yourName);
+    if (gameState.yourId) {
+      console.log("SEND NAME");
+      socketRef.current.send(
+        JSON.stringify({ type: "send-name", name: yourName, roomId }),
+      );
+    }
+  }, [gameState.yourId]);
 
   // logging
   Object.entries(gameState).map(([key, value]) => {
@@ -233,6 +254,7 @@ export default function Home() {
           diceComplete={diceComplete}
           roomId={roomId}
           diceResultsCopy={diceResultsCopy}
+          opponentName={opponentName}
           handleGameState={handleGameState}
           handleDiceComplete={handleDiceComplete}
           handleDiceResultsCopy={handleDiceResultsCopy}
