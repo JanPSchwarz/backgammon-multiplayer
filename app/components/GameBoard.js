@@ -465,7 +465,11 @@ export default function GameBoard({
             showOptions={showOptions}
             onClickHandler={onClickHandler}
           />
-          <Prison gameState={gameState} selectedField={selectedField} />
+          <Prison
+            gameState={gameState}
+            selectedField={selectedField}
+            onClickHandler={onClickHandler}
+          />
           <EndFields
             gameState={gameState}
             onClickHandler={onClickHandler}
