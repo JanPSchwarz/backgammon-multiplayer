@@ -70,8 +70,9 @@ export default function Home() {
           handleGameState("board", message.board);
         }
 
+        console.log("IS FULL:", message.isFull);
+
         if (message.isFull) {
-          console.log("IS FULL:", message.isFull);
           setReadyToStart(true);
         }
       }
