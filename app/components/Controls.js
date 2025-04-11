@@ -153,8 +153,6 @@ export default function DiceControls({
     }
   }, [diceColor]);
 
-  console.log("DICE COLOR:", diceColor);
-
   // handle socket MESSAGES
   useEffect(() => {
     if (!socket.current) return;
@@ -164,8 +162,6 @@ export default function DiceControls({
       if (message.type === "dice-rolled") {
         handleGameState("diceResults", ["?", "?"]);
         const { determinedNumbers, theme_colorset } = message.diceConfig;
-
-        console.log("THEME LOG:", message.diceConfig);
 
         Dice.updateConfig({ theme_colorset }).then(() => {
           Dice.roll(`2dpip@${determinedNumbers}`);
@@ -205,7 +201,6 @@ export default function DiceControls({
     const randomResult2 = Math.floor(Math.random() * 5) + 1;
     const determinedNumbers = `${randomResult1}, ${randomResult2}`;
     const theme_colorset = diceColor;
-    console.log("THEME:", theme_colorset);
 
     const diceConfig = { determinedNumbers, theme_colorset };
 

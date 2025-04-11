@@ -22,6 +22,7 @@ export default function Home() {
   const [diceResultsCopy, setDiceResultsCopy] = useState([]);
   const [yourTurn, setYourTurn] = useState();
   const [readyToStart, setReadyToStart] = useState(false);
+  const [isEndgame, setIsEndGame] = useState(false);
 
   // UI
   const [gameEnd, setGameEnd] = useState(false);
@@ -35,7 +36,6 @@ export default function Home() {
   const [opponentName, setOpponentName] = useState("");
   const [opponentWantsRematch, setOpponentWantsRematch] = useState(null);
 
-  console.log("SWITCH TURN TIMER:", switchTurnTimer);
   // PWA navigation
   const [isPWA, setIsPWA] = useState(false);
 
@@ -70,8 +70,6 @@ export default function Home() {
           handleGameState("board", message.board);
         }
 
-        console.log("IS FULL:", message.isFull);
-
         if (message.isFull) {
           setReadyToStart(true);
         }
@@ -84,7 +82,6 @@ export default function Home() {
           setOpponentDisconnect(false);
           setStatusText("Opponent reconnected!");
         }
-        console.log("IS FULL:", message.isFull);
         if (message.isFull) {
           setReadyToStart(true);
         }
@@ -97,13 +94,12 @@ export default function Home() {
       }
 
       if (message.type === "switch-turn") {
-        console.log("switch turn to:", message.turn);
         handleGameState("currentTurn", message.turn);
         handleGameState("diceResults", ["?", "?"]);
       }
 
       if (message.type === "error") {
-        console.log("error:", message.message);
+        console.error("error:", message.message);
       }
 
       if (message.type === "receive-timer") {
@@ -112,7 +108,6 @@ export default function Home() {
       }
 
       if (message.type === "receive-name") {
-        console.log("RECEIVE NAME:", message.opponentName);
         const opponentName = message.opponentName;
         setOpponentName(opponentName);
       }
@@ -127,7 +122,12 @@ export default function Home() {
       }
 
       if (message.type === "start-rematch") {
-        console.log("start-rematch");
+        handleGameState("currentTurn", message.turn);
+        handleGameState("diceResults", ["?", "?"]);
+        handleGameState("board", intialGameState.board);
+        setIsEndGame(false);
+        setGameEnd(false);
+        setOpponentWantsRematch(null);
       }
     };
 
@@ -209,7 +209,6 @@ export default function Home() {
 
   useEffect(() => {
     if (gameState.yourId) {
-      console.log("SEND NAME");
       socketRef.current.send(
         JSON.stringify({ type: "send-name", name: yourName, roomId }),
       );
@@ -256,6 +255,10 @@ export default function Home() {
     setGameEnd(!gameEnd);
   }
 
+  function handleIsEndGame(value) {
+    setIsEndGame(value);
+  }
+
   return (
     <>
       <div
@@ -270,6 +273,9 @@ export default function Home() {
           diceResultsCopy={diceResultsCopy}
           opponentName={opponentName}
           readyToStart={readyToStart}
+          score={score}
+          isEndgame={isEndgame}
+          handleIsEndGame={handleIsEndGame}
           handleGameState={handleGameState}
           handleDiceComplete={handleDiceComplete}
           handleDiceResultsCopy={handleDiceResultsCopy}

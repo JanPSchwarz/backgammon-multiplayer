@@ -20,14 +20,14 @@ export default function SharePrompt({ closeModal, roomId }) {
       try {
         await navigator.share(data);
       } catch (error) {
-        console.log("error writing to clipboard:", error);
+        console.error("error writing to clipboard:", error);
       }
     } else {
       try {
         await navigator.clipboard.writeText(data);
         handleUI();
       } catch (error) {
-        console.log("error writing to clipboard:", error);
+        console.error("error writing to clipboard:", error);
       }
     }
   }

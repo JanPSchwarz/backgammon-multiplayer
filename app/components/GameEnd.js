@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Modal from "./Modal";
+import { twMerge } from "tailwind-merge";
 
 export default function GameEnd({
   score,
-  closeModal,
   yourName,
   opponentName,
   yourId,
@@ -80,20 +80,28 @@ export default function GameEnd({
             </button>
             <button
               onClick={() => handleRematch(false)}
-              className={`rounded-md bg-red-300 px-4 py-1 text-red-600`}
+              className={`rounded-md px-4 py-1 ${
+                youWantRematch !== null && youWantRematch === true
+                  ? `bg-gray-300 text-gray-600`
+                  : `bg-red-300 text-red-600`
+              }`}
             >
               Leave
             </button>
           </div>
-          {opponentWantsRematch !== null && (
-            <p
-              className={`my-4 rounded-md px-2 py-1 ${opponentWantsRematch ? `bg-green-400/90` : `bg-red-400/90`}`}
-            >
-              {opponentName}{" "}
-              {opponentWantsRematch ? " wants " : " doesn't want "}
-              to rematch!
-            </p>
-          )}
+          <p
+            className={twMerge(
+              `my-4 rounded-md px-2 py-1`,
+              `${opponentWantsRematch !== null && opponentWantsRematch && `bg-green-400/90`}`,
+              `${opponentWantsRematch !== null && opponentWantsRematch === false && `bg-red-400`}`,
+            )}
+          >
+            {(opponentWantsRematch === null &&
+              `Awaiting opponents answer...`) ||
+              (!opponentWantsRematch &&
+                `${opponentName} doesn't want to rematch.`) ||
+              (opponentWantsRematch && `${opponentName} wants to rematch!`)}
+          </p>
         </div>
       </Modal>
     </>
