@@ -15,6 +15,9 @@ export default function GameBoard({
   diceResultsCopy,
   opponentName,
   roomId,
+  isEndgame,
+  handleIsEndGame,
+  score,
   diceComplete,
   handleGameBoardUI,
   handleDisableButton,
@@ -29,7 +32,6 @@ export default function GameBoard({
   //Logic
   const [socketRef, setSocketRef] = useState();
   const [allMoveOptions, setAllMoveOptions] = useState(null);
-  const [isEndgame, setIsEndGame] = useState(false);
 
   const initalStepControl = {
     boardUpdated: false,
@@ -136,9 +138,9 @@ export default function GameBoard({
         .filter(({ color }) => gameState.yourColor === color).length;
 
       if (remainingStones === stonesInEndZone) {
-        setIsEndGame(true);
+        handleIsEndGame(true);
       } else {
-        setIsEndGame(false);
+        handleIsEndGame(false);
       }
       changeStepControl("boardUpdated", false);
       changeStepControl("endGameUpdated", true);
@@ -478,9 +480,11 @@ export default function GameBoard({
           />
           <PlayersUI
             yourColor={gameState.yourColor}
+            yourId={gameState.yourId}
             opponentName={opponentName}
             webSocket={socketRef}
             roomId={roomId}
+            score={score}
           />
         </div>
         {!readyToStart && (

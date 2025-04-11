@@ -2,6 +2,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 import express from "express";
 import { uid } from "uid";
+import { intialGameState } from "./app/utils/gameState.js";
 
 const app = express();
 const server = createServer(app);
@@ -196,7 +197,18 @@ wss.on("connection", (ws) => {
         rematchArray.every((entry) => entry === true);
 
       if (allPlayersConfirmed) {
-        broadCastToRoom(roomId, { type: "start-rematch" });
+        const numberOfGames = Object.values(thisRoom.score).reduce(
+          (memo, num) => memo + num,
+          0,
+        );
+        thisRoom.board = intialGameState.board;
+        thisRoom.turn =
+          numberOfGames % 2 === 0 ? thisRoom.players[0] : thisRoom.players[1];
+        thisRoom.rematch = {};
+
+        const turn =
+          numberOfGames % 2 === 0 ? thisRoom.players[0] : thisRoom.players[1];
+        broadCastToRoom(roomId, { type: "start-rematch", turn });
       } else {
         broadCastToOtherPlayer(roomId, ws, { type: "wants-rematch", answer });
       }
