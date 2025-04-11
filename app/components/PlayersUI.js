@@ -2,6 +2,7 @@ import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import useLocalStorageState from "use-local-storage-state";
 import NameModal from "./NameModal";
+import PencilIcon from "@/public/pencil.svg";
 
 export default function PlayersUI({
   yourColor,
@@ -30,25 +31,25 @@ export default function PlayersUI({
         ? opponentName
         : "Player 2";
 
-  const commonTextClasses = `px-1 bg-blue-300 text-sm rounded-md md:text-lg lg:text-2xl`;
+  const commonTextClasses = `px-1 bg-blue-300 gap-1 flex justify-center items-center text-sm rounded-md md:text-lg lg:text-xl`;
   const commonWrapperClasses = `absolute`;
 
   const playerUI = [
     {
       playerName: firstPlayer,
-      addWrapperClasses: `left-16 top-1 portrait:-top-3`,
-      addTextClasses: `bg-stone-900 text-white`,
+      addWrapperClasses: `left-[10%] top-[2%]`,
+      addTextClasses: `bg-stone-900 text-white border-[0.5px] border-white`,
       isYou: yourColor === "black" ? true : false,
     },
     {
       playerName: secondPlayer,
-      addWrapperClasses: `bottom-1 right-16 portrait:-bottom-3`,
-      addTextClasses: `bg-white`,
+      addWrapperClasses: `bottom-[2%] right-[10%] `,
+      addTextClasses: `bg-white border-[0.5px] border-black`,
       isYou: yourColor === "white" ? true : false,
     },
   ];
 
-  function handleModal(event) {
+  function handleModal() {
     setShowNameModal(!showNameModal);
   }
 
@@ -69,6 +70,11 @@ export default function PlayersUI({
                   id={playerName}
                 >
                   <p className={twMerge(commonTextClasses, addTextClasses)}>
+                    {isYou && (
+                      <PencilIcon
+                        className={`size-3 md:size-4 ${yourColor === "black" ? `fill-white` : `fill-black`}`}
+                      />
+                    )}
                     {playerName}
                   </p>
                 </div>

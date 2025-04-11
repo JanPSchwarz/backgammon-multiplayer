@@ -20,6 +20,7 @@ export default function GameBoard({
   handleGameBoardUI,
   handleDisableButton,
   handleswitchTurnTimer,
+  readyToStart,
 }) {
   //UI
   const [selectedField, setSelectedField] = useState();
@@ -479,6 +480,16 @@ export default function GameBoard({
             roomId={roomId}
           />
         </div>
+        {!readyToStart && (
+          <p
+            className={`absolute z-20 rounded-lg border border-blue-600 bg-gray-800 p-3 text-center font-semibold text-blue-400 shadow-xl`}
+          >
+            Waiting for opponent...
+            <span className={`block font-medium`}>
+              Use share button to invite a friend!
+            </span>
+          </p>
+        )}
       </div>
     </>
   );

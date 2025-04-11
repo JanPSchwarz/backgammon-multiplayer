@@ -5,7 +5,9 @@ import GameBoard from "../components/GameBoard";
 import Controls from "../components/Controls";
 import { usePathname } from "next/navigation";
 import { intialGameState } from "../utils/gameState";
-import Spinner from "@/public/board/infinite-spinner.svg";
+import LoadingScreen from "../components/LoadingScreen";
+import DisconnectMessage from "../components/DisconnectMessage";
+import GameEnd from "../components/GameEnd";
 
 export default function Home() {
   const pathname = usePathname();
@@ -22,6 +24,8 @@ export default function Home() {
   const [readyToStart, setReadyToStart] = useState(false);
 
   // UI
+  const [gameEnd, setGameEnd] = useState(false);
+  const [score, setScore] = useState({});
   const [disableButton, setDisableButton] = useState(false);
   const [boardLoaded, setBoardLoaded] = useState(false);
   const [switchTurnTimer, setSwitchTurnTimer] = useState(false);
@@ -29,6 +33,7 @@ export default function Home() {
     defaultValue: "",
   });
   const [opponentName, setOpponentName] = useState("");
+  const [opponentWantsRematch, setOpponentWantsRematch] = useState(null);
 
   console.log("SWITCH TURN TIMER:", switchTurnTimer);
   // PWA navigation
@@ -108,6 +113,19 @@ export default function Home() {
         const opponentName = message.opponentName;
         setOpponentName(opponentName);
       }
+
+      if (message.type === "game-end") {
+        setGameEnd(true);
+        setScore(message.score);
+      }
+
+      if (message.type === "wants-rematch") {
+        setOpponentWantsRematch(message.answer);
+      }
+
+      if (message.type === "start-rematch") {
+        console.log("start-rematch");
+      }
     };
 
     ws.onclose = () => {
@@ -121,6 +139,17 @@ export default function Home() {
     };
   }, []);
 
+  // detect end game
+  useEffect(() => {
+    const endZoneKey =
+      gameState.yourColor === "black" ? "blackOut" : "whiteOut";
+    const isEnd = gameState.board[endZoneKey].length === 15;
+
+    if (isEnd) {
+      socketRef.current.send(JSON.stringify({ type: "game-end", roomId }));
+    }
+  }, [gameState.board]);
+
   // detect PWA
   useEffect(() => {
     if (window.matchMedia(`(display-mode: standalone)`).matches) {
@@ -129,19 +158,19 @@ export default function Home() {
   }, []);
 
   // adding PROMPT before LEAVING page
-  // useEffect(() => {
-  //   function beforeUnload(event) {
-  //     event.preventDefault();
+  useEffect(() => {
+    function beforeUnload(event) {
+      event.preventDefault();
 
-  //     event.returnValue = true;
-  //   }
+      event.returnValue = true;
+    }
 
-  //   window.addEventListener("beforeunload", beforeUnload);
+    window.addEventListener("beforeunload", beforeUnload);
 
-  //   return () => {
-  //     window.removeEventListener("beforeunload", beforeUnload);
-  //   };
-  // }, []);
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnload);
+    };
+  }, []);
 
   // UI updates
   useEffect(() => {
@@ -176,7 +205,6 @@ export default function Home() {
   }, [switchTurnTimer]);
 
   useEffect(() => {
-    console.log(yourName);
     if (gameState.yourId) {
       console.log("SEND NAME");
       socketRef.current.send(
@@ -221,29 +249,12 @@ export default function Home() {
     );
   }
 
+  function closeEndGameModal() {
+    setGameEnd(!gameEnd);
+  }
+
   return (
     <>
-      <div
-        className={`fixed z-[101] flex h-screen w-screen flex-col items-center justify-center gap-10 ${boardLoaded ? `hidden` : `visible`} top-0 transition-opacity`}
-      >
-        <Spinner className={`w-[50%] max-w-[250px]`} />
-        <p>Loading Game...</p>
-      </div>
-      <div
-        className={`absolute top-0 z-20 ${boardLoaded ? `opacity-1` : `opacity-0`} ${statusText ? `translate-y-0` : `translate-y-[-100%] duration-0`} rounded-b-md transition-all ${oponentDisconnect ? `border-red-400 bg-red-200/90 text-red-800` : `border-blue-400 bg-blue-50/80 text-blue-800`} border border-t-0 p-4 font-semibold md:text-lg`}
-      >
-        <p className={``}>{statusText}</p>
-      </div>
-      {!readyToStart && (
-        <p
-          className={`absolute z-20 ${boardLoaded ? `opacity-1` : `opacity-0`} rounded-lg border-2 border-blue-600 bg-blue-400/90 p-2 text-center text-lg italic text-neutral-800 shadow-xl`}
-        >
-          Waiting for opponent...
-          <span className={`block not-italic`}>
-            Use share button to invite a friend!
-          </span>
-        </p>
-      )}
       <div
         className={`relative flex h-full w-full items-center justify-center gap-4 portrait:flex-col ${boardLoaded ? `opacity-1` : `opacity-0`} transition-opacity duration-500 landscape:flex-row`}
       >
@@ -255,6 +266,7 @@ export default function Home() {
           roomId={roomId}
           diceResultsCopy={diceResultsCopy}
           opponentName={opponentName}
+          readyToStart={readyToStart}
           handleGameState={handleGameState}
           handleDiceComplete={handleDiceComplete}
           handleDiceResultsCopy={handleDiceResultsCopy}
@@ -278,6 +290,25 @@ export default function Home() {
           handleDisableButton={handleDisableButton}
         />
       </div>
+      <LoadingScreen boardLoaded={boardLoaded} />
+      <DisconnectMessage
+        boardLoaded={boardLoaded}
+        oponentDisconnect={oponentDisconnect}
+        statusText={statusText}
+      />
+      {gameEnd && (
+        <GameEnd
+          score={score}
+          closeModal={closeEndGameModal}
+          yourName={yourName}
+          opponentName={opponentName}
+          yourId={gameState.yourId}
+          yourColor={gameState.yourColor}
+          opponentWantsRematch={opponentWantsRematch}
+          webSocket={socketRef.current}
+          roomId={roomId}
+        />
+      )}
     </>
   );
 }

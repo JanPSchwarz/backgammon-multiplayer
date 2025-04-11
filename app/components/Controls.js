@@ -184,9 +184,12 @@ export default function DiceControls({
       "bronze",
       "necrotic",
       "fire",
-      "ice",
-      "water",
       "earth",
+      "ice",
+      "force",
+      "bloodmoon",
+      "swrpg_abi",
+      "swa_red",
     ];
     const random = Math.floor(Math.random() * themes.length);
 
@@ -218,19 +221,6 @@ export default function DiceControls({
       Dice.renderer.clear();
     }
   }
-
-  // UI mapping
-  const diceCount = diceResultsCopy.reduce((acc, num) => {
-    acc[num] = (acc[num] || 0) + 1;
-    return acc;
-  }, {});
-
-  const diceUI = gameState.diceResults.map((result) => {
-    const isUsed = diceCount[result] > 0 ? false : true;
-    if (!isUsed) diceCount[result]--;
-
-    return { result, used: isUsed };
-  });
 
   return (
     <>

@@ -36,9 +36,9 @@ wss.on("connection", (ws) => {
           board: null,
           colors: [],
           wasDisconnect: false,
-          player1Name: "",
-          player2Name: "",
           names: {},
+          score: {},
+          rematch: {},
         };
         ws.send(JSON.stringify({ type: "room-created", roomId }));
         logRoom();
@@ -162,9 +162,9 @@ wss.on("connection", (ws) => {
       const yourName = data.name;
       thisRoom.names[senderId] = yourName;
 
-      const otherPlayerName = Object.entries(thisRoom.names)
-        .filter(([id, name]) => id !== senderId)
-        ?.map(([id, name]) => name)[0];
+      const otherPlayerName = Object.keys(thisRoom.names)
+        .filter((id) => id !== senderId)
+        ?.map((id) => thisRoom.names[id])[0];
 
       broadCastToOtherPlayer(roomId, ws, {
         type: "receive-name",
@@ -176,6 +176,30 @@ wss.on("connection", (ws) => {
           opponentName: otherPlayerName,
         }),
       );
+    }
+
+    if (data.type === "game-end") {
+      thisRoom.score[senderId] = (thisRoom.score[senderId] || 0) + 1;
+      const score = thisRoom.score;
+
+      broadCastToRoom(roomId, { type: "game-end", score });
+    }
+
+    if (data.type === "wants-rematch") {
+      thisRoom.rematch[senderId] = data.answer;
+      const answer = data.answer;
+
+      const rematchArray = Object.values(thisRoom.rematch);
+
+      const allPlayersConfirmed =
+        rematchArray.length === 2 &&
+        rematchArray.every((entry) => entry === true);
+
+      if (allPlayersConfirmed) {
+        broadCastToRoom(roomId, { type: "start-rematch" });
+      } else {
+        broadCastToOtherPlayer(roomId, ws, { type: "wants-rematch", answer });
+      }
     }
   });
 
