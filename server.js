@@ -95,7 +95,7 @@ wss.on("connection", (ws) => {
 
         thisRoom.colors.push({ client: senderId, color: yourColor });
 
-        const isFull = thisRoom.players.length === 1 ? true : false;
+        const isFull = thisRoom.players.length === 2 ? true : false;
 
         ws.send(
           JSON.stringify({

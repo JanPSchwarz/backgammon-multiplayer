@@ -71,6 +71,7 @@ export default function Home() {
         }
 
         if (message.isFull) {
+          console.log("IS FULL:", message.isFull);
           setReadyToStart(true);
         }
       }
