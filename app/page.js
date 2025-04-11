@@ -5,6 +5,7 @@ import Link from "next/link";
 import { uid } from "uid";
 import PWAManual from "./components/PWAManual";
 import { useRouter } from "next/navigation";
+import Heading from "@/public/Heading.svg";
 
 export default function Room() {
   const [newRoomId, setNewRoomId] = useState();
@@ -133,65 +134,79 @@ export default function Room() {
   }
 
   return (
-    <div className={`flex max-w-[200px] flex-col items-center justify-center`}>
-      {showManualForPWA && <PWAManual handleShowManual={handleShowManual} />}
-      {pwaNOTinstalled && (
-        <button
-          className={`absolute right-0 top-0 m-6 rounded-md bg-green-400/80 p-2 text-sm font-semibold shadow-md shadow-green-800/30 md:p-4 md:py-3 md:text-base`}
-          onClick={installPWA}
-        >
-          Install App!
-        </button>
-      )}
-      <button
-        className={`my-6 w-full rounded-md bg-orange-500 p-6 text-xl font-semibold`}
-        onClick={createRoom}
-      >
-        Create Room
-      </button>
+    <>
       <div
-        className={`relative flex w-full ${newRoomId ? `opacity-100` : `opacity-0`} items-center gap-2 transition-opacity duration-300`}
+        className={`flex h-full max-h-[500px] w-full flex-col items-center justify-evenly md:max-h-[700px]`}
       >
-        <Link
-          href={`/${newRoomId}`}
-          className={`w-full rounded-md bg-indigo-300 p-2 text-center font-semibold`}
+        <Heading
+          className={`my-4 w-11/12 max-w-[350px] rounded-2xl border-black p-2 [box-shadow:_5px_5px_10px_#6c6c6c,_-5px_-5px_10px_#ffffff] md:max-w-[600px]`}
+        />
+        <div
+          className={`flex max-w-[200px] flex-col items-center justify-center gap-10 md:max-w-[500px] landscape:gap-4 md:landscape:gap-20`}
         >
-          Your room is ready
-        </Link>
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        className={`relative flex translate-y-12 flex-col gap-2`}
-      >
-        <label
-          className={`max-w-min text-nowrap rounded-md bg-white p-1`}
-          htmlFor="roomId"
-        >
-          Join Room
-        </label>
-        <div className={`flex gap-2`}>
-          <input
-            className={`w-full rounded p-2 placeholder:px-1 invalid:border-red-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:invalid:border-red-400 focus:invalid:ring-red-400`}
-            id="roomId"
-            type="text"
-            pattern="[a-z0-9]{11}"
-            title="11 characters, only numbers and small letters"
-            maxLength={11}
-            name="roomId"
-            placeholder="Room Id"
-          />
-          <button className={`rounded-md bg-green-400 p-1.5`} type="submit">
-            Go
-          </button>
-          {noRoom && (
-            <p
-              className={`absolute my-2 w-full rounded-md bg-red-400/50 p-1 portrait:translate-y-[200%] landscape:translate-x-[110%] landscape:lg:translate-x-0 landscape:lg:translate-y-[200%]`}
-            >
-              Room doesn&apos;t exist...
-            </p>
+          {showManualForPWA && (
+            <PWAManual handleShowManual={handleShowManual} />
           )}
+          {pwaNOTinstalled && (
+            <button
+              className={`absolute right-0 top-0 m-6 rounded-md bg-green-400/80 p-2 text-xs font-semibold shadow-md shadow-green-800/30 md:p-4 md:py-3 md:text-base`}
+              onClick={installPWA}
+            >
+              Install App!
+            </button>
+          )}
+          <div className={`relative flex w-full justify-center`}>
+            <button
+              className={`w-full rounded-md border-b-4 border-orange-600 bg-orange-500/90 p-2 px-3 text-lg font-semibold text-[#262523] shadow-lg`}
+              onClick={createRoom}
+            >
+              Create Room
+            </button>
+            <Link
+              href={`/${newRoomId}`}
+              className={`absolute -right-2 flex h-full translate-x-[100%] justify-center rounded-md border-b-2 border-green-800 bg-green-400 p-1 px-2 ${newRoomId ? `opacity-1` : `opacity-0`} items-center gap-2 transition-opacity duration-300`}
+            >
+              Go
+            </Link>
+          </div>
+          <form
+            onSubmit={handleSubmit}
+            className={`relative flex flex-col gap-2`}
+          >
+            <label
+              className={`max-w-min text-nowrap rounded-md bg-white p-1 text-sm font-semibold`}
+              htmlFor="roomId"
+            >
+              Join Room
+            </label>
+            <div className={`flex gap-2`}>
+              <input
+                className={`w-full rounded p-2 placeholder:px-1 invalid:border-red-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:invalid:border-red-400 focus:invalid:ring-red-400`}
+                id="roomId"
+                type="text"
+                pattern="[a-z0-9]{11}"
+                title="11 characters, only numbers and small letters"
+                maxLength={11}
+                name="roomId"
+                placeholder="Room Id"
+              />
+              <button
+                className={`rounded-md border-b-2 border-green-800 bg-green-400 p-1.5`}
+                type="submit"
+              >
+                Go
+              </button>
+              {noRoom && (
+                <p
+                  className={`absolute w-full rounded-md border border-red-800 bg-red-400/50 p-1 text-red-800 portrait:translate-y-[200%] landscape:translate-x-[110%] landscape:lg:translate-x-0 landscape:lg:translate-y-[200%]`}
+                >
+                  Room doesn&apos;t exist...
+                </p>
+              )}
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+      </div>
+    </>
   );
 }

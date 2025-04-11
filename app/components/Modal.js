@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import Close from "@/public/close.svg";
-import { on } from "ws";
 
 export default function Modal({ children, onClose }) {
   const dialogRef = useRef();
@@ -13,7 +12,7 @@ export default function Modal({ children, onClose }) {
 
   function closeModal(event) {
     event.stopPropagation();
-    if (dialogRef.current) {
+    if (dialogRef.current && onClose) {
       dialogRef.current.close();
       onClose();
     }
@@ -21,7 +20,11 @@ export default function Modal({ children, onClose }) {
 
   function handleKeyDown(event) {
     if (event.code === "Escape") {
-      onClose();
+      if (onClose) {
+        onClose();
+      } else {
+        event.preventDefault();
+      }
     }
   }
 
@@ -34,12 +37,14 @@ export default function Modal({ children, onClose }) {
         ref={dialogRef}
       >
         <div className={``} onClick={(event) => event.stopPropagation()}>
-          <button
-            className={`absolute right-0 top-0 m-1 max-w-min rounded-full`}
-            onClick={closeModal}
-          >
-            <Close className={`size-6 fill-red-400`} />
-          </button>
+          {onClose && (
+            <button
+              className={`absolute right-0 top-0 m-1 max-w-min rounded-full`}
+              onClick={closeModal}
+            >
+              <Close className={`size-6 fill-red-400`} />
+            </button>
+          )}
           {children}
         </div>
       </dialog>

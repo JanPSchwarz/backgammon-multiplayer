@@ -19,13 +19,16 @@ wss.on("connection", (ws) => {
   console.log("Client connected");
   ws.id = uid();
 
+  const senderId = ws.id;
+
   ws.on("message", (message) => {
     const data = JSON.parse(message);
 
-    if (data.type === "create-room") {
-      const roomId = data.roomId;
+    const roomId = data?.roomId;
+    const thisRoom = rooms[roomId];
 
-      if (!rooms[roomId]) {
+    if (data.type === "create-room") {
+      if (!thisRoom) {
         rooms[roomId] = {
           players: [],
           sockets: {},
@@ -33,6 +36,9 @@ wss.on("connection", (ws) => {
           board: null,
           colors: [],
           wasDisconnect: false,
+          names: {},
+          score: {},
+          rematch: {},
         };
         ws.send(JSON.stringify({ type: "room-created", roomId }));
         logRoom();
@@ -44,9 +50,7 @@ wss.on("connection", (ws) => {
     }
 
     if (data.type === "join-room") {
-      const roomId = data.roomId;
-
-      if (rooms[roomId]?.players.includes(ws.id)) {
+      if (thisRoom?.players.includes(senderId)) {
         ws.send(
           JSON.stringify({
             type: "error",
@@ -56,55 +60,59 @@ wss.on("connection", (ws) => {
         return;
       }
 
-      if (rooms[roomId]?.players.length === 2) {
+      if (thisRoom?.players.length === 2) {
         ws.send(
           JSON.stringify({ type: "error", message: "Room is full already" }),
         );
         return;
       }
 
-      if (rooms[roomId]) {
-        rooms[roomId].players.push(ws.id);
-        rooms[roomId].sockets[ws.id] = ws;
+      if (thisRoom) {
+        thisRoom.players.push(senderId);
+        thisRoom.sockets[senderId] = ws;
 
-        const otherPlayer = rooms[roomId].players.filter(
-          (player) => player !== ws.id,
+        const firstToJoin = thisRoom.players.length === 1 ? true : false;
+        const otherPlayer = thisRoom.players.filter(
+          (player) => player !== senderId,
         )[0];
 
-        rooms[roomId].turn =
-          rooms[roomId].players.length === 1
-            ? ws.id
-            : rooms[roomId].turn === undefined
-              ? ws.id
-              : otherPlayer;
+        thisRoom.turn = firstToJoin
+          ? senderId
+          : thisRoom.turn === undefined
+            ? senderId
+            : otherPlayer;
 
-        const alreadyGivenColor = rooms[roomId].colors
-          .filter((item) => item?.client !== ws.id)
+        const alreadyGivenColor = thisRoom.colors
+          .filter((item) => item?.client !== senderId)
           .map((item) => item?.color)[0];
 
         const yourColor =
-          rooms[roomId].colors.length === 0
+          thisRoom.colors.length === 0
             ? "black"
             : alreadyGivenColor === "black"
               ? "white"
               : "black";
 
-        rooms[roomId].colors.push({ client: ws.id, color: yourColor });
+        thisRoom.colors.push({ client: senderId, color: yourColor });
+
+        const isFull = thisRoom.players.length === 2 ? true : false;
 
         ws.send(
           JSON.stringify({
             type: "room-joined",
             roomId,
-            id: ws.id,
-            turn: rooms[roomId].turn,
+            id: senderId,
+            turn: thisRoom.turn,
             color: yourColor,
-            board: rooms[roomId]?.board,
+            board: thisRoom?.board,
+            isFull,
           }),
         );
         broadCastToOtherPlayer(roomId, ws, {
           type: "player-joined",
-          turn: rooms[roomId].turn,
-          wasDisconnect: rooms[roomId].wasDisconnect,
+          turn: thisRoom.turn,
+          isFull,
+          wasDisconnect: thisRoom.wasDisconnect,
         });
         logRoom();
         return;
@@ -115,69 +123,105 @@ wss.on("connection", (ws) => {
 
     if (data.type === "make-move") {
       const newBoard = data.board;
-      const roomId = data.roomId;
-      rooms[roomId].board = newBoard;
+      thisRoom.board = newBoard;
       broadCastToOtherPlayer(roomId, ws, { type: "new-move", board: newBoard });
     }
 
     if (data.type === "switch-turn") {
-      const roomId = data.roomId;
-      const otherPlayer = rooms[roomId].players.filter(
-        (player) => player !== ws.id,
+      const otherPlayer = thisRoom.players.filter(
+        (playersId) => playersId !== senderId,
       )[0];
 
-      console.log("other player id:", otherPlayer);
-
       if (otherPlayer) {
-        rooms[roomId].turn = otherPlayer;
+        thisRoom.turn = otherPlayer;
         broadCastToRoom(roomId, {
           type: "switch-turn",
           turn: otherPlayer,
         });
       } else {
-        rooms[roomId].turn = undefined;
+        thisRoom.turn = undefined;
       }
     }
 
     if (data.type === "roll-dice") {
       const diceConfig = data.diceConfig;
-      const roomId = data.roomId;
-
       broadCastToRoom(roomId, { type: "dice-rolled", diceConfig });
     }
 
     if (data.type === "check-exist") {
-      const roomId = data.roomId;
       const exists = Object.keys(rooms).includes(roomId);
       ws.send(JSON.stringify({ type: "room-exists", exists, roomId }));
     }
 
     if (data.type === "send-timer") {
-      const roomId = data.roomId;
       const timer = data.timer;
       broadCastToRoom(roomId, { type: "receive-timer", timer });
+    }
+
+    if (data.type === "send-name") {
+      const yourName = data.name;
+      thisRoom.names[senderId] = yourName;
+
+      const otherPlayerName = Object.keys(thisRoom.names)
+        .filter((id) => id !== senderId)
+        ?.map((id) => thisRoom.names[id])[0];
+
+      broadCastToOtherPlayer(roomId, ws, {
+        type: "receive-name",
+        opponentName: yourName,
+      });
+      ws.send(
+        JSON.stringify({
+          type: "receive-name",
+          opponentName: otherPlayerName,
+        }),
+      );
+    }
+
+    if (data.type === "game-end") {
+      thisRoom.score[senderId] = (thisRoom.score[senderId] || 0) + 1;
+      const score = thisRoom.score;
+
+      broadCastToRoom(roomId, { type: "game-end", score });
+    }
+
+    if (data.type === "wants-rematch") {
+      thisRoom.rematch[senderId] = data.answer;
+      const answer = data.answer;
+
+      const rematchArray = Object.values(thisRoom.rematch);
+
+      const allPlayersConfirmed =
+        rematchArray.length === 2 &&
+        rematchArray.every((entry) => entry === true);
+
+      if (allPlayersConfirmed) {
+        broadCastToRoom(roomId, { type: "start-rematch" });
+      } else {
+        broadCastToOtherPlayer(roomId, ws, { type: "wants-rematch", answer });
+      }
     }
   });
 
   ws.on("close", () => {
     for (const roomId in rooms) {
-      if (rooms[roomId].sockets[ws.id]) {
-        delete rooms[roomId].sockets[ws.id];
+      const thisRoom = rooms[roomId];
+      if (thisRoom.sockets[senderId]) {
+        delete thisRoom.sockets[senderId];
 
-        rooms[roomId].players = rooms[roomId].players.filter(
-          (playerId) => playerId !== ws.id,
+        thisRoom.players = thisRoom.players.filter(
+          (playerId) => playerId !== senderId,
         );
 
-        rooms[roomId].colors = rooms[roomId].colors.filter(
-          (item) => item.client !== ws.id,
+        thisRoom.colors = thisRoom.colors.filter(
+          (item) => item.client !== senderId,
         );
 
-        rooms[roomId].turn =
-          rooms[roomId].turn === ws.id ? undefined : rooms[roomId].turn;
+        thisRoom.turn = thisRoom.turn === senderId ? undefined : thisRoom.turn;
 
-        rooms[roomId].wasDisconnect = true;
+        thisRoom.wasDisconnect = true;
 
-        if (Object.keys(rooms[roomId].sockets).length === 0) {
+        if (Object.keys(thisRoom.sockets).length === 0) {
           delete rooms[roomId];
         } else {
           broadCastToRoom(roomId, { type: "player-left" });
@@ -213,7 +257,7 @@ function broadCastToOtherPlayer(roomId, ws, message) {
 
 function logRoom() {
   console.log("number of rooms", Object.keys(rooms).length);
-  console.log(rooms);
+  console.log("Rooms:", rooms);
   Object.keys(rooms).map((room) => {
     console.log(`number of clients in ${room}:`, rooms[room].players.length);
   });
