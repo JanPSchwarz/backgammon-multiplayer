@@ -84,6 +84,7 @@ export default function Home() {
           setOpponentDisconnect(false);
           setStatusText("Opponent reconnected!");
         }
+        console.log("IS FULL:", message.isFull);
         if (message.isFull) {
           setReadyToStart(true);
         }
