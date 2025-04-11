@@ -50,9 +50,12 @@ export default function GameEnd({
         <div className={`flex flex-col items-center justify-center gap-4 p-8`}>
           <h2 className={`text-lg font-semibold`}>Game End!</h2>
           <div className={`grid grid-cols-2 gap-2`}>
-            {scoreUI.map(({ name, score }) => {
+            {scoreUI.map(({ name, score }, index) => {
               return (
-                <div className={`flex flex-col items-center justify-center`}>
+                <div
+                  key={index}
+                  className={`flex flex-col items-center justify-center`}
+                >
                   <p className={`mb-2`}>{name}</p>
                   <p
                     className={`rounded border border-dashed border-black bg-gray-200 p-4 font-mono text-lg`}
