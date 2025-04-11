@@ -52,15 +52,14 @@ export default function SharePrompt({ closeModal, roomId }) {
   }
 
   function shareUrl() {
-    const baseURL = window.location.href;
-    const url = `${baseURL}${roomId}`;
+    const thisUrl = window.location.href;
 
     const nativeShareData = {
       title: "Wanna play Backgammon?\n",
-      url: `${url}`,
+      url: thisUrl,
     };
 
-    const sendData = deviceCanShare ? nativeShareData : url;
+    const sendData = deviceCanShare ? nativeShareData : thisUrl;
 
     function handleUI() {
       setUrlCopied(true);
@@ -84,7 +83,7 @@ export default function SharePrompt({ closeModal, roomId }) {
             </div>
             <p className={`flex items-center justify-center`}>Share RoomID</p>
           </button>
-          <button onClick={shareUrl} className={`flex group gap-4`}>
+          <button onClick={shareUrl} className={`group flex gap-4`}>
             <div
               className={`flex aspect-square w-10 items-center justify-center rounded-full bg-blue-500 text-center font-semibold text-white group-active:scale-90`}
             >

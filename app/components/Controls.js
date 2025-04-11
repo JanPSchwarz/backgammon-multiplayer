@@ -234,7 +234,7 @@ export default function DiceControls({
       <SideButtonPanel
         clearDice={clearDice}
         oponentDisconnect={oponentDisconnect}
-        roomId
+        roomId={roomId}
         switchTurnTimer={switchTurnTimer}
         readyToStart={readyToStart}
       />
