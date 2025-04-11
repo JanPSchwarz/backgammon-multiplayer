@@ -2,7 +2,7 @@ import Image from "next/image";
 import WhiteStone from "@/public/board/whitestone.webp";
 import BlackStone from "@/public/board/blackstone.webp";
 
-export default function Prison({ gameState }) {
+export default function Prison({ gameState, selectedField }) {
   // UI mapping
   const prison = [
     { id: "0", color: "black", number: gameState.board[0].length },

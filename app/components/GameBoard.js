@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import useLocalStorageState from "use-local-storage-state";
 import MainBoard from "./MainBoard";
 import EndFields from "./EndFields";
 import Prison from "./Prison";
@@ -466,7 +465,7 @@ export default function GameBoard({
             showOptions={showOptions}
             onClickHandler={onClickHandler}
           />
-          <Prison gameState={gameState} />
+          <Prison gameState={gameState} selectedField={selectedField} />
           <EndFields
             gameState={gameState}
             onClickHandler={onClickHandler}
